@@ -1,9 +1,11 @@
-package com.github.axet.desktop.os;
+package com.github.axet.desktop.os.mac;
 
 import java.io.File;
 import java.lang.reflect.Method;
 
 import com.github.axet.desktop.Desktop;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
 
 public class OSX extends Desktop {
 
@@ -26,8 +28,17 @@ public class OSX extends Desktop {
 
     @Override
     public File getDownloads() {
-        // From CarbonCore/Folders.h
-        return path("issd");
+        Pointer p = NSFileNanager.INSTANCE.NSSearchPathForDirectoriesInDomains(NSFileNanager.NSDownloadsDirectory,
+                NSFileNanager.NSUserDomainMask, true);
+
+        int count = CoreFoundation.INSTANCE.CFArrayGetCount(p);
+        if (count != 1)
+            throw new RuntimeException("Download folder not found");
+
+        Pointer pp = CoreFoundation.INSTANCE.CFArrayGetValueAtIndex(p, 0);
+        String path = CFStringRef.toString(pp);
+
+        return new File(path);
     }
 
     private static Class<?> FileManagerClass;

@@ -2,8 +2,8 @@ package com.github.axet.desktop;
 
 import java.io.File;
 
-import com.github.axet.desktop.os.OSX;
 import com.github.axet.desktop.os.Windows;
+import com.github.axet.desktop.os.mac.OSX;
 
 public abstract class Desktop {
 
@@ -36,7 +36,7 @@ public abstract class Desktop {
         
         System.out.println("Home: "+d.getHome());
         System.out.println("Documents: "+d.getDocuments());
-        System.out.println("Downloads: "+d.getDownloads());
         System.out.println("AppFolder: "+d.getAppData());
+        System.out.println("Downloads: "+d.getDownloads());
     }
 }
