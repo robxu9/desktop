@@ -4,5 +4,5 @@
 		  <artifactId>desktop</artifactId>
 		  <version>0.0.2</version>
 		</dependency>
-		</dependencies>
+	</dependencies>
 		
