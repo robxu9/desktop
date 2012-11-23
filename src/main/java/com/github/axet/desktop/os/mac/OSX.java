@@ -27,6 +27,12 @@ public class OSX extends Desktop {
     }
 
     @Override
+    public File getDesktop() {
+        // From CarbonCore/Folders.h
+        return path("desk");
+    }
+
+    @Override
     public File getDownloads() {
         Pointer p = NSFileNanager.INSTANCE.NSSearchPathForDirectoriesInDomains(NSFileNanager.NSDownloadsDirectory,
                 NSFileNanager.NSUserDomainMask, true);

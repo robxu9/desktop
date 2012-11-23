@@ -7,7 +7,7 @@ import com.github.axet.desktop.os.mac.OSX;
 
 public abstract class Desktop {
 
-    public static Desktop getDesktop() {
+    public static Desktop desktop() {
         if (com.sun.jna.Platform.isWindows()) {
             return new Windows();
         }
@@ -16,7 +16,7 @@ public abstract class Desktop {
             return new OSX();
         }
 
-        return null;
+        throw new RuntimeException("OS not supported");
     }
 
     // user application data folder
@@ -31,12 +31,16 @@ public abstract class Desktop {
     // user downloads
     abstract public File getDownloads();
 
+    // user desktop
+    abstract public File getDesktop();
+
     public static void main(String[] args) {
-        Desktop d = Desktop.getDesktop();
-        
-        System.out.println("Home: "+d.getHome());
-        System.out.println("Documents: "+d.getDocuments());
-        System.out.println("AppFolder: "+d.getAppData());
-        System.out.println("Downloads: "+d.getDownloads());
+        Desktop d = Desktop.desktop();
+
+        System.out.println("Home: " + d.getHome());
+        System.out.println("Documents: " + d.getDocuments());
+        System.out.println("AppFolder: " + d.getAppData());
+        System.out.println("Downloads: " + d.getDownloads());
+        System.out.println("Desktop: " + d.getDesktop());
     }
 }

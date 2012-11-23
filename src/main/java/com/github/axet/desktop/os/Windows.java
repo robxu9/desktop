@@ -22,11 +22,11 @@ import com.sun.jna.win32.W32APITypeMapper;
 public class Windows extends Desktop {
 
     public File getHome() {
-        return null;
+        return new File(System.getenv("HOME"));
     }
 
     public File getDocuments() {
-        return null;
+        return path(Shell32.CSIDL_PERSONAL);
     }
 
     public File getDownloads() {
@@ -90,6 +90,12 @@ public class Windows extends Desktop {
          */
         public int SHGetFolderPath(HWND hwndOwner, int nFolder, HANDLE hToken, int dwFlags, char[] pszPath);
 
+    }
+
+    @Override
+    public File getDesktop() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
