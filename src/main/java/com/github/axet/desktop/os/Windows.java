@@ -1,14 +1,19 @@
 package com.github.axet.desktop.os;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.github.axet.desktop.Desktop;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.NativeMapped;
 import com.sun.jna.PointerType;
+import com.sun.jna.Structure;
 import com.sun.jna.win32.W32APIFunctionMapper;
 import com.sun.jna.win32.W32APITypeMapper;
 
@@ -30,7 +35,20 @@ public class Windows extends Desktop {
     }
 
     public File getDownloads() {
-        return null;
+        GUID guid = new GUID("374DE290-123F-4565-9164-39C4925E467B");
+
+        HANDLE hToken = null;
+        int dwFlags = Shell32.SHGFP_TYPE_CURRENT;
+        char[] pszPath = new char[Shell32.MAX_PATH];
+        int hResult = Shell32.INSTANCE.SHGetKnownFolderPath(guid, dwFlags, hToken, pszPath);
+        if (Shell32.S_OK == hResult) {
+            String path = new String(pszPath);
+            int len = path.indexOf('\0');
+            path = path.substring(0, len);
+            return new File(path);
+        } else {
+            throw new RuntimeException("Error: " + hResult);
+        }
     }
 
     @Override
@@ -71,6 +89,46 @@ public class Windows extends Desktop {
     static class HWND extends HANDLE {
     }
 
+    public static class GUID extends Structure {
+
+        public static class ByValue extends GUID implements Structure.ByValue {
+        }
+
+        public byte[] data;
+
+        public GUID() {
+        }
+
+        public GUID(String g) {
+            Pattern p = Pattern.compile("(\\w+)-(\\w+)-(\\w+)-(\\w+)-(\\w+)");
+            Matcher m = p.matcher(g);
+            if (!m.find())
+                throw new RuntimeException("bad guid");
+            int l1 = Integer.parseInt(m.group(1), 16);
+            int l2 = Integer.parseInt(m.group(2), 16);
+            int l3 = Integer.parseInt(m.group(3), 16);
+            int l4 = Integer.parseInt(m.group(4), 16);
+
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                DataOutputStream dos = new DataOutputStream(bos);
+                dos.writeInt(l1);
+                dos.writeShort(l2);
+                dos.writeShort(l3);
+                dos.writeShort(l4);
+                for (String c : m.group(5).split("(?<=\\G.{2})")) {
+                    int bb = Integer.parseInt(c, 16);
+                    dos.writeByte(bb);
+                }
+                dos.flush();
+
+                data = bos.toByteArray();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     static interface Shell32 extends Library {
         public static final int MAX_PATH = 260;
 
@@ -94,6 +152,13 @@ public class Windows extends Desktop {
          * DWORD dwFlags, LPTSTR pszPath);
          */
         public int SHGetFolderPath(HWND hwndOwner, int nFolder, HANDLE hToken, int dwFlags, char[] pszPath);
+
+        /**
+         * HRESULT SHGetKnownFolderPath( _In_ REFKNOWNFOLDERID rfid, _In_ DWORD
+         * dwFlags, _In_opt_ HANDLE hToken, _Out_ PWSTR *ppszPath );
+         */
+
+        public int SHGetKnownFolderPath(GUID rfid, int dwFlags, HANDLE hToken, char[] ppszPath);
 
     }
 }
