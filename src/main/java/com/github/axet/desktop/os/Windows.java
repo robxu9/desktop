@@ -38,6 +38,11 @@ public class Windows extends Desktop {
         return path(Shell32.CSIDL_LOCAL_APPDATA);
     }
 
+    @Override
+    public File getDesktop() {
+        return path(Shell32.CSIDL_DESKTOPDIRECTORY);
+    }
+
     public File path(int nFolder) {
         HWND hwndOwner = null;
         HANDLE hToken = null;
@@ -91,11 +96,4 @@ public class Windows extends Desktop {
         public int SHGetFolderPath(HWND hwndOwner, int nFolder, HANDLE hToken, int dwFlags, char[] pszPath);
 
     }
-
-    @Override
-    public File getDesktop() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 }
