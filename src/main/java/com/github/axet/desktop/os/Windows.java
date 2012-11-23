@@ -38,8 +38,9 @@ public class Windows extends Desktop {
     }
 
     public File getDownloads() {
+        // xp has no default downloads folder. so be it My Documents :)
         if (SystemUtils.IS_OS_WINDOWS_XP)
-            FileUtils.getFile(getDocuments(), "Downloads");
+            return getDocuments();
 
         return getDownloadsVista();
     }
