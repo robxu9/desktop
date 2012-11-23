@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
+
 import com.github.axet.desktop.Desktop;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
@@ -27,7 +30,7 @@ import com.sun.jna.win32.W32APITypeMapper;
 public class Windows extends Desktop {
 
     public File getHome() {
-        return new File(System.getenv("HOME"));
+        return new File(System.getenv("USERPROFILE"));
     }
 
     public File getDocuments() {
@@ -35,6 +38,19 @@ public class Windows extends Desktop {
     }
 
     public File getDownloads() {
+        if (SystemUtils.IS_OS_WINDOWS_XP)
+            FileUtils.getFile(getDocuments(), "Downloads");
+
+        return getDownloadsVista();
+    }
+
+    /**
+     * http://stackoverflow.com/questions/7672774/how-do-i-determine-the-windows
+     * -download-folder-path
+     * 
+     * @return
+     */
+    public File getDownloadsVista() {
         GUID guid = new GUID("374DE290-123F-4565-9164-39C4925E467B");
 
         HANDLE hToken = null;
