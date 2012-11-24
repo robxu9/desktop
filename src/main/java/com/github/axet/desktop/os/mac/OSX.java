@@ -3,9 +3,11 @@ package com.github.axet.desktop.os.mac;
 import java.io.File;
 import java.lang.reflect.Method;
 
+import com.github.axet.apple.CFArrayRef;
+import com.github.axet.apple.CFStringRef;
 import com.github.axet.desktop.Desktop;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
+
+import fundations.NSFileNanager;
 
 public class OSX extends Desktop {
 
@@ -34,17 +36,17 @@ public class OSX extends Desktop {
 
     @Override
     public File getDownloads() {
-        Pointer p = NSFileNanager.INSTANCE.NSSearchPathForDirectoriesInDomains(NSFileNanager.NSDownloadsDirectory,
-                NSFileNanager.NSUserDomainMask, true);
+        CFArrayRef a = NSFileNanager.INSTANCE.NSSearchPathForDirectoriesInDomains(
+                NSFileNanager.NSSearchPathDirectory.NSDownloadsDirectory,
+                NSFileNanager.NSSearchPathDomainMask.NSUserDomainMask, true);
 
-        int count = CoreFoundation.INSTANCE.CFArrayGetCount(p);
+        int count = a.getCount();
         if (count != 1)
             throw new RuntimeException("Download folder not found");
 
-        Pointer pp = CoreFoundation.INSTANCE.CFArrayGetValueAtIndex(p, 0);
-        String path = CFStringRef.toString(pp);
+        CFStringRef path = new CFStringRef(a.get(0));
 
-        return new File(path);
+        return new File(path.toString());
     }
 
     private static Class<?> FileManagerClass;
