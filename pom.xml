@@ -4,7 +4,7 @@
 
   <groupId>com.github.axet</groupId>
   <artifactId>desktop</artifactId>
-  <version>0.0.4</version>
+  <version>0.0.5</version>
   <packaging>jar</packaging>
 
   <name>desktop</name>
@@ -74,6 +74,11 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ini4j</groupId>
+      <artifactId>ini4j</artifactId>
+      <version>0.3.3</version>
     </dependency>
   </dependencies>
 

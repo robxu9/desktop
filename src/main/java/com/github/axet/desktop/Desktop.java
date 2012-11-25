@@ -2,6 +2,7 @@ package com.github.axet.desktop;
 
 import java.io.File;
 
+import com.github.axet.desktop.os.Linux;
 import com.github.axet.desktop.os.mac.OSX;
 import com.github.axet.desktop.os.win.Windows;
 
@@ -14,6 +15,10 @@ public abstract class Desktop {
 
         if (com.sun.jna.Platform.isMac()) {
             return new OSX();
+        }
+
+        if (com.sun.jna.Platform.isLinux()) {
+            return new Linux();
         }
 
         throw new RuntimeException("OS not supported");
