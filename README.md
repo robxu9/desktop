@@ -5,6 +5,8 @@ library very helpful.
 
 ## Example
 
+	import com.github.axet.desktop.Desktop;
+
 	public class Example {
 	
 	    public static void main(String[] args) {
