@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.W32APIFunctionMapper;
 import com.sun.jna.win32.W32APITypeMapper;
 
@@ -34,9 +35,9 @@ public interface Shell32 extends Library {
 
     static Shell32 INSTANCE = (Shell32) Native.loadLibrary("shell32", Shell32.class, OPTIONS);
 
+    // http://msdn.microsoft.com/en-us/library/bb762181(VS.85).aspx
+
     /**
-     * see http://msdn.microsoft.com/en-us/library/bb762181(VS.85).aspx
-     * 
      * HRESULT SHGetFolderPath( HWND hwndOwner, int nFolder, HANDLE hToken,
      * DWORD dwFlags, LPTSTR pszPath);
      */
@@ -47,6 +48,6 @@ public interface Shell32 extends Library {
      * dwFlags, _In_opt_ HANDLE hToken, _Out_ PWSTR *ppszPath );
      */
 
-    public int SHGetKnownFolderPath(GUID rfid, int dwFlags, HANDLE hToken, char[] pszPath);
+    public int SHGetKnownFolderPath(GUID rfid, int dwFlags, HANDLE hToken, PointerByReference pszPath);
 
 }
