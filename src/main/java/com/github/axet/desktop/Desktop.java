@@ -2,9 +2,8 @@ package com.github.axet.desktop;
 
 import java.io.File;
 
-import com.github.axet.desktop.os.Windows;
-import com.github.axet.desktop.os.Windows.GUID;
 import com.github.axet.desktop.os.mac.OSX;
+import com.github.axet.desktop.os.win.Windows;
 
 public abstract class Desktop {
 
