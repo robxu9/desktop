@@ -4,7 +4,7 @@
 
   <groupId>com.github.axet</groupId>
   <artifactId>desktop</artifactId>
-  <version>0.0.5</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>desktop</name>
@@ -59,11 +59,6 @@
       <groupId>net.java.dev.jna</groupId>
       <artifactId>platform</artifactId>
       <version>3.4.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.axet</groupId>
-      <artifactId>apple</artifactId>
-      <version>0.0.2</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
