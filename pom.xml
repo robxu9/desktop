@@ -4,7 +4,7 @@
 
   <groupId>com.github.axet</groupId>
   <artifactId>desktop</artifactId>
-  <version>0.0.5-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>desktop</name>
