@@ -3,11 +3,10 @@ package com.github.axet.desktop.os.mac;
 import java.io.File;
 import java.lang.reflect.Method;
 
-import com.github.axet.apple.CFArrayRef;
-import com.github.axet.apple.CFStringRef;
 import com.github.axet.desktop.Desktop;
-
-import fundations.NSFileNanager;
+import com.github.axet.desktop.apple.CFArrayRef;
+import com.github.axet.desktop.apple.CFStringRef;
+import com.github.axet.desktop.apple.fundations.NSFileNanager;
 
 public class OSX extends Desktop {
 
