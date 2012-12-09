@@ -1,11 +1,11 @@
-package com.github.axet.desktop.apple;
+package com.github.axet.desktop.os.mac;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 
-import com.github.axet.desktop.apple.fundations.ApplicationServices;
+import com.github.axet.desktop.os.mac.foundation.ApplicationServices;
 
 public class Apple {
 

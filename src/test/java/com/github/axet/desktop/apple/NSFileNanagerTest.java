@@ -1,8 +1,8 @@
 package com.github.axet.desktop.apple;
 
-import com.github.axet.desktop.apple.CFArrayRef;
-import com.github.axet.desktop.apple.CFStringRef;
-import com.github.axet.desktop.apple.fundations.NSFileNanager;
+import com.github.axet.desktop.os.mac.CFArrayRef;
+import com.github.axet.desktop.os.mac.CFStringRef;
+import com.github.axet.desktop.os.mac.foundation.NSFileNanager;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

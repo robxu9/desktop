@@ -1,8 +1,8 @@
-package com.github.axet.desktop.apple;
+package com.github.axet.desktop.os.mac;
 
 import java.io.UnsupportedEncodingException;
 
-import com.github.axet.desktop.apple.fundations.CoreFoundation;
+import com.github.axet.desktop.os.mac.foundation.CoreFoundation;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;

@@ -4,9 +4,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 
 import com.github.axet.desktop.Desktop;
-import com.github.axet.desktop.apple.CFArrayRef;
-import com.github.axet.desktop.apple.CFStringRef;
-import com.github.axet.desktop.apple.fundations.NSFileNanager;
+import com.github.axet.desktop.os.mac.foundation.NSFileNanager;
 
 public class OSX extends Desktop {
 

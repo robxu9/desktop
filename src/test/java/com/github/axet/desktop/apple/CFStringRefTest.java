@@ -1,6 +1,6 @@
 package com.github.axet.desktop.apple;
 
-import com.github.axet.desktop.apple.CFStringRef;
+import com.github.axet.desktop.os.mac.CFStringRef;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

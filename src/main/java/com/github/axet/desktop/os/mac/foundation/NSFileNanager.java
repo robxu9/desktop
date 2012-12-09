@@ -1,6 +1,6 @@
-package com.github.axet.desktop.apple.fundations;
+package com.github.axet.desktop.os.mac.foundation;
 
-import com.github.axet.desktop.apple.CFArrayRef;
+import com.github.axet.desktop.os.mac.CFArrayRef;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
