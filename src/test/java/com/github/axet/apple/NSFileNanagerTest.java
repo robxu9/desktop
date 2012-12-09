@@ -1,9 +1,10 @@
 package com.github.axet.apple;
 
+import com.github.axet.apple.fundations.NSFileNanager;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import fundations.NSFileNanager;
 
 public class NSFileNanagerTest extends TestCase {
     public NSFileNanagerTest(String testName) {

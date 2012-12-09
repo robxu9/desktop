@@ -1,9 +1,9 @@
 package com.github.axet.apple;
 
+import com.github.axet.apple.fundations.CoreFoundation;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
-import fundations.CoreFoundation;
 
 public class CFArrayRef extends PointerByReference {
 

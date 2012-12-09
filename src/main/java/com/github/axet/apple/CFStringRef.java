@@ -2,11 +2,11 @@ package com.github.axet.apple;
 
 import java.io.UnsupportedEncodingException;
 
+import com.github.axet.apple.fundations.CoreFoundation;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
-import fundations.CoreFoundation;
 
 public class CFStringRef extends PointerByReference {
 

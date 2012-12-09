@@ -1,4 +1,4 @@
-package fundations;
+package com.github.axet.apple.fundations;
 
 import com.github.axet.apple.CFArrayRef;
 import com.sun.jna.Library;
