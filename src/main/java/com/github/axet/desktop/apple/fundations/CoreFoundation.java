@@ -1,8 +1,8 @@
-package com.github.axet.apple.fundations;
+package com.github.axet.desktop.apple.fundations;
 
-import com.github.axet.apple.CFArrayRef;
-import com.github.axet.apple.CFRange;
-import com.github.axet.apple.CFStringRef;
+import com.github.axet.desktop.apple.CFArrayRef;
+import com.github.axet.desktop.apple.CFRange;
+import com.github.axet.desktop.apple.CFStringRef;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
