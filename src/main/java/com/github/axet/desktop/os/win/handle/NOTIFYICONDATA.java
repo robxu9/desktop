@@ -36,12 +36,6 @@ public class NOTIFYICONDATA extends Structure {
         cbSize = size();
     }
 
-    @Override
-    protected List<?> getFieldOrder() {
-        return Arrays.asList(new String[] { "cbSize", "hWnd", "uID", "uFlags", "uCallbackMessage", "hIcon", "szTip",
-                "dwState", "dwStateMask", "szInfo", "union", "szInfoTitle", "dwInfoFlags", "uidItem", "hBalloonIcon" });
-    }
-
     public int cbSize = 0;
     public HWND hWnd = null;
     public int uID = 0;

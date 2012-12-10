@@ -13,7 +13,7 @@ import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.W32APIFunctionMapper;
 import com.sun.jna.win32.W32APITypeMapper;
 
-public interface Shell32 extends Library {
+public interface Shell32Ex extends Library {
     public static final int MAX_PATH = 260;
 
     // Local Settings\Application Data
@@ -40,7 +40,7 @@ public interface Shell32 extends Library {
         }
     };
 
-    static Shell32 INSTANCE = (Shell32) Native.loadLibrary("shell32", Shell32.class, OPTIONS);
+    static Shell32Ex INSTANCE = (Shell32Ex) Native.loadLibrary("shell32", Shell32Ex.class, OPTIONS);
 
     // http://msdn.microsoft.com/en-us/library/bb762181(VS.85).aspx
 

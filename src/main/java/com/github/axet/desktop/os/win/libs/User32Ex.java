@@ -1,8 +1,5 @@
 package com.github.axet.desktop.os.win.libs;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.github.axet.desktop.os.win.handle.ATOM;
 import com.github.axet.desktop.os.win.handle.ICONINFO;
 import com.github.axet.desktop.os.win.handle.WNDCLASSEX;
@@ -16,19 +13,13 @@ import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
-import com.sun.jna.win32.W32APIFunctionMapper;
+import com.sun.jna.win32.W32APIOptions;
 
 public interface User32Ex extends Library {
 
-    public static final Map<String, Object> OPTIONS = new HashMap<String, Object>() {
-        private static final long serialVersionUID = 5531778097995782635L;
-        {
-            // put(Library.OPTION_TYPE_MAPPER, W32APITypeMapper.UNICODE);
-            put(Library.OPTION_FUNCTION_MAPPER, W32APIFunctionMapper.UNICODE);
-        }
-    };
+    public static final int WS_OVERLAPPEDWINDOW = 0xcf0000;
 
-    static User32Ex INSTANCE = (User32Ex) Native.loadLibrary("user32", User32Ex.class, OPTIONS);
+    static User32Ex INSTANCE = (User32Ex) Native.loadLibrary("user32", User32Ex.class, W32APIOptions.DEFAULT_OPTIONS);
 
     // http://msdn.microsoft.com/en-us/library/windows/desktop/ms648062(v=vs.85).aspx
 

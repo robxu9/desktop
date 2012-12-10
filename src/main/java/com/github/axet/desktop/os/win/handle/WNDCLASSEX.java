@@ -1,6 +1,8 @@
 package com.github.axet.desktop.os.win.handle;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.WString;
 import com.sun.jna.platform.win32.WinDef.HCURSOR;
 import com.sun.jna.platform.win32.WinDef.HICON;
 import com.sun.jna.platform.win32.WinDef.HINSTANCE;
@@ -27,8 +29,8 @@ public class WNDCLASSEX extends Structure {
     public HICON hIcon;
     public HCURSOR hCursor;
     public HANDLE hbrBackground;
-    public String lpszMenuName;
-    public String lpszClassName;
+    public WString lpszMenuName;
+    public WString lpszClassName;
     public HICON hIconSm;
 
     public static class ByReference extends WNDCLASSEX implements Structure.ByReference {
