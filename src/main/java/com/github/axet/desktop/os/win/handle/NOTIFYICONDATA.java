@@ -38,8 +38,10 @@ public class NOTIFYICONDATA extends Structure {
 
     public int cbSize = 0;
     public HWND hWnd = null;
+    // id of icon - passed back in wParam of message
     public int uID = 0;
     public int uFlags = 0;
+    // notification message, pass to hwnd WM_USER + 1
     public int uCallbackMessage = 0;
     public HICON hIcon = null;
     public char[] szTip = new char[64];

@@ -80,4 +80,19 @@ public interface User32Ex extends Library {
      * UINT WINAPI RegisterWindowMessage( _In_ LPCTSTR lpString );
      */
     int RegisterWindowMessage(String lpString);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms632682(v=vs.85).aspx
+
+    /**
+     * BOOL WINAPI DestroyWindow( _In_ HWND hWnd );
+     */
+    boolean DestroyWindow(HWND hWnd);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms644950(v=vs.85).aspx
+
+    /**
+     * LRESULT WINAPI SendMessage( _In_ HWND hWnd, _In_ UINT Msg, _In_ WPARAM
+     * wParam, _In_ LPARAM lParam );
+     */
+    LRESULT SendMessage(HWND hWnd, int Msg, WPARAM wParam, LPARAM lParam);
 }

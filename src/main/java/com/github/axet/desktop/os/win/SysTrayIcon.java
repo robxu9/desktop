@@ -3,6 +3,11 @@ package com.github.axet.desktop.os.win;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.swing.SwingUtilities;
 
 import com.github.axet.desktop.os.win.handle.ATOM;
 import com.github.axet.desktop.os.win.handle.ICONINFO;
@@ -19,6 +24,7 @@ import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HBITMAP;
 import com.sun.jna.platform.win32.WinDef.HDC;
 import com.sun.jna.platform.win32.WinDef.HICON;
+import com.sun.jna.platform.win32.WinDef.HINSTANCE;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
@@ -32,6 +38,18 @@ import com.sun.jna.ptr.PointerByReference;
 
 public class SysTrayIcon {
 
+    public interface Listener {
+        public void mouseLeftClick();
+
+        public void mouseLeftDoubleClick();
+
+        public void mouseRightClick();
+
+        public void mouseRightDoubleClick();
+
+        public void mouseRightUp();
+    }
+
     public static final int WM_TASKBARCREATED = User32Ex.INSTANCE.RegisterWindowMessage("TaskbarCreated");
     public static final int WM_LBUTTONDOWN = 513;
     public static final int WM_NCCREATE = 129;
@@ -42,59 +60,142 @@ public class SysTrayIcon {
     public static final int WM_USER = 1024;
     public static final int WM_LBUTTONDBLCLK = 515;
     public static final int WM_RBUTTONUP = 517;
+    public static final int WM_QUIT = 0x0012;
+    public static final int WM_CLOSE = 0x0010;
 
-    public static interface Listener {
-        public void mouseLeftClick();
+    public static final int SW_SHOW = 5;
 
-        public void mouseRightClick();
-    }
-
-    public static class MessagePump implements Runnable {
+    public class MessagePump implements Runnable {
         Thread t;
+
+        final String klass = "SystemTrayIcon";
+        ATOM wcatom;
+        WNDPROC WndProc;
+        HWND hWnd;
+        HINSTANCE hInstance;
+
+        Object lock = new Object();
 
         public MessagePump() {
             t = new Thread(this, "MessagePump");
-            t.start();
+        }
+
+        public void start() {
+            synchronized (lock) {
+                t.start();
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+
+        void create() {
+            WndProc = new WNDPROC() {
+                public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
+                    switch (lParam.intValue()) {
+                    case WM_LBUTTONDBLCLK:
+                        for (Listener l : Collections.synchronizedCollection(listeners)) {
+                            l.mouseLeftDoubleClick();
+                        }
+                        break;
+                    case WM_RBUTTONUP:
+                        for (Listener l : Collections.synchronizedCollection(listeners)) {
+                            l.mouseRightUp();
+                        }
+                        break;
+                    }
+
+                    if (uMsg == WM_TASKBARCREATED) {
+                        update();
+                    }
+
+                    if (uMsg == WM_QUIT)
+                        User32.INSTANCE.PostQuitMessage(0);
+
+                    return User32Ex.INSTANCE.DefWindowProc(hWnd, uMsg, wParam, lParam);
+                }
+            };
+            hWnd = createWindow();
+        }
+
+        // http://osdir.com/ml/java.jna.user/2008-07/msg00049.html
+
+        HWND createWindow() {
+            hInstance = Kernel32.INSTANCE.GetModuleHandle(null);
+
+            WNDCLASSEX wc = new WNDCLASSEX();
+            wc.cbSize = wc.size();
+            wc.style = 0;
+            wc.lpfnWndProc = WndProc;
+            wc.cbClsExtra = 0;
+            wc.cbWndExtra = 0;
+            wc.hInstance = hInstance;
+            wc.hIcon = null;
+            wc.hbrBackground = null;
+            wc.lpszMenuName = null;
+            wc.lpszClassName = new WString(klass);
+
+            wcatom = User32Ex.INSTANCE.RegisterClassEx(wc);
+            if (wcatom == null)
+                throw new GetLastErrorException();
+
+            HWND hwnd = User32Ex.INSTANCE.CreateWindowEx(0, klass, klass, User32Ex.WS_OVERLAPPEDWINDOW, 0, 0, 0, 0,
+                    null, null, hInstance, null);
+
+            if (hwnd == null)
+                throw new GetLastErrorException();
+
+            return hwnd;
         }
 
         @Override
         public void run() {
+            create();
+
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+
             MSG msg = new MSG();
 
-            while (User32.INSTANCE.GetMessage(msg, null, 0, 0) > 0) {
+            while (User32.INSTANCE.GetMessage(msg, hWnd, 0, 0) > 0) {
                 User32.INSTANCE.DispatchMessage(msg);
+            }
+
+            destory();
+        }
+
+        void destory() {
+            if (hWnd != null) {
+                if (!User32Ex.INSTANCE.DestroyWindow(hWnd))
+                    throw new GetLastErrorException();
+                hWnd = null;
+            }
+
+            if (wcatom != null) {
+                if (!User32Ex.INSTANCE.UnregisterClass(klass, hInstance))
+                    throw new GetLastErrorException();
+                wcatom = null;
+            }
+        }
+
+        void close() {
+            User32Ex.INSTANCE.SendMessage(hWnd, WM_QUIT, null, null);
+
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
 
-    static WNDPROC WndProc;
-    static HWND hWnd;
+    static int count = 0;
     static MessagePump mp;
 
-    static {
-        WndProc = new WNDPROC() {
-            public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
-                int loword = lParam.intValue() & 0xff;
-
-                switch (loword) {
-                case WM_LBUTTONDBLCLK:
-                    break;
-                case WM_RBUTTONUP:
-                    break;
-                }
-
-                if (uMsg == WM_TASKBARCREATED) {
-                    ;
-                }
-                System.out.println(uMsg);
-                return User32Ex.INSTANCE.DefWindowProc(hWnd, uMsg, wParam, lParam);
-            }
-        };
-
-        hWnd = createWindow();
-
-        mp = new MessagePump();
-    }
+    boolean close = false;
 
     BufferedImage icon;
     String title;
@@ -102,7 +203,18 @@ public class SysTrayIcon {
     HBITMAP hbm;
     HICON hico;
 
+    Set<Listener> listeners = new HashSet<Listener>();
+
     public SysTrayIcon() {
+        create();
+    }
+
+    void create() {
+        if (count == 0) {
+            mp = new MessagePump();
+            mp.start();
+        }
+        count++;
     }
 
     public void close() {
@@ -114,6 +226,32 @@ public class SysTrayIcon {
             GDI32.INSTANCE.DeleteObject(hico);
             hico = null;
         }
+
+        if (!close) {
+            close = true;
+
+            count--;
+            if (count == 0) {
+                if (mp != null) {
+                    mp.close();
+                    mp = null;
+                }
+            }
+        }
+    }
+
+    public void addListener(Listener l) {
+        listeners.add(l);
+    }
+
+    public void removeListener(Listener l) {
+        listeners.remove(l);
+    }
+
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        close();
     }
 
     // https://github.com/twall/jna/blob/master/contrib/alphamaskdemo/com/sun/jna/contrib/demo/AlphaMaskDemo.java
@@ -181,36 +319,6 @@ public class SysTrayIcon {
         return hicon;
     }
 
-    // http://osdir.com/ml/java.jna.user/2008-07/msg00049.html
-
-    static HWND createWindow() {
-        String klass = "SystemTrayIcon";
-
-        WNDCLASSEX wc = new WNDCLASSEX();
-        wc.cbSize = wc.size();
-        wc.style = 0;
-        wc.lpfnWndProc = WndProc;
-        wc.cbClsExtra = 0;
-        wc.cbWndExtra = 0;
-        wc.hInstance = Kernel32.INSTANCE.GetModuleHandle(null);
-        wc.hIcon = null;
-        wc.hbrBackground = null;
-        wc.lpszMenuName = null;
-        wc.lpszClassName = new WString(klass);
-
-        ATOM atom = User32Ex.INSTANCE.RegisterClassEx(wc);
-        if (atom == null)
-            throw new GetLastErrorException();
-
-        HWND hwnd = User32Ex.INSTANCE.CreateWindowEx(0, klass, null, User32Ex.WS_OVERLAPPEDWINDOW, 0, 0, 0, 0, null,
-                null, wc.hInstance, null);
-
-        if (hwnd == null)
-            throw new GetLastErrorException();
-
-        return hwnd;
-    }
-
     public void setIcon(BufferedImage icon) {
         this.icon = icon;
     }
@@ -234,12 +342,11 @@ public class SysTrayIcon {
 
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
         nid.setTooltip(title);
-        nid.hWnd = hWnd;
+        nid.hWnd = mp.hWnd;
         nid.uCallbackMessage = WM_USER + 1;
         nid.hIcon = hico;
 
-        boolean res = Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_ADD, nid);
-        if (!res)
+        if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_ADD, nid))
             throw new GetLastErrorException();
     }
 
@@ -258,7 +365,7 @@ public class SysTrayIcon {
 
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
         nid.setTooltip(title);
-        nid.hWnd = hWnd;
+        nid.hWnd = mp.hWnd;
         nid.uCallbackMessage = WM_USER + 1;
         nid.hIcon = hico;
 
@@ -268,8 +375,7 @@ public class SysTrayIcon {
 
     public void hide() {
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
-        nid.hWnd = hWnd;
-        nid.uCallbackMessage = WM_USER + 1;
+        nid.hWnd = mp.hWnd;
 
         boolean res = Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_DELETE, nid);
         if (!res)
