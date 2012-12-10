@@ -14,7 +14,7 @@ public class GUID extends Structure {
     public static class ByValue extends GUID implements Structure.ByValue {
     }
 
-    public byte[] data;
+    public byte[] data = new byte[16];
 
     public GUID() {
     }

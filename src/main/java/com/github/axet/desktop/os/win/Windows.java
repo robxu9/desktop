@@ -1,12 +1,14 @@
 package com.github.axet.desktop.os.win;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.apache.commons.lang.SystemUtils;
 
 import com.github.axet.desktop.Desktop;
-import com.sun.jna.Memory;
+import com.github.axet.desktop.os.win.libs.Ole32;
+import com.github.axet.desktop.os.win.libs.Shell32;
+import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.ptr.PointerByReference;
 
 /**
@@ -37,7 +39,7 @@ public class Windows extends Desktop {
     //
     // http://stackoverflow.com/questions/7672774/how-do-i-determine-the-windows-download-folder-path
     //
-    
+
     /**
      * 
      * 
@@ -84,7 +86,7 @@ public class Windows extends Desktop {
             path = path.substring(0, len);
             return new File(path);
         } else {
-            throw new RuntimeException("Error: " + hResult);
+            throw new HResultException(hResult);
         }
     }
 
