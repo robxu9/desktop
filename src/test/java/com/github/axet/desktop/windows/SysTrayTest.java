@@ -32,8 +32,6 @@ public class SysTrayTest extends JFrame {
     SysTrayIcon.Listener ml = new SysTrayIcon.Listener() {
         @Override
         public void mouseLeftClick() {
-            // TODO Auto-generated method stub
-
         }
 
         @Override
@@ -56,12 +54,14 @@ public class SysTrayTest extends JFrame {
         @Override
         public void mouseRightUp() {
             System.out.println("right up");
-            
+
         }
     };
 
     public SysTrayTest() {
         super("MainFrame");
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         try {
             InputStream is = SysTrayTest.class.getResourceAsStream("bug.ico");
@@ -219,12 +219,6 @@ public class SysTrayTest extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                new SysTrayTest();
-            }
-        });
+        new SysTrayTest();
     }
 }
