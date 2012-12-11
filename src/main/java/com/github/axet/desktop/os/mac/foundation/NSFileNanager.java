@@ -1,8 +1,8 @@
 package com.github.axet.desktop.os.mac.foundation;
 
-import com.github.axet.desktop.os.mac.CFArrayRef;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 
 public interface NSFileNanager extends Library {
 
@@ -61,5 +61,5 @@ public interface NSFileNanager extends Library {
      * @param expandTilde
      * @return
      */
-    public CFArrayRef NSSearchPathForDirectoriesInDomains(int directory, int domainMask, boolean expandTilde);
+    public Pointer NSSearchPathForDirectoriesInDomains(int directory, int domainMask, boolean expandTilde);
 }

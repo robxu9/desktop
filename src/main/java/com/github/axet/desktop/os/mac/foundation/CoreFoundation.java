@@ -1,8 +1,8 @@
 package com.github.axet.desktop.os.mac.foundation;
 
-import com.github.axet.desktop.os.mac.CFArrayRef;
-import com.github.axet.desktop.os.mac.CFRange;
-import com.github.axet.desktop.os.mac.CFStringRef;
+import com.github.axet.desktop.os.mac.cocoa.CFRange;
+import com.github.axet.desktop.os.mac.cocoa.NSArray;
+import com.github.axet.desktop.os.mac.cocoa.NSString;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -24,7 +24,7 @@ public interface CoreFoundation extends Library {
      * @param numChars
      * @return
      */
-    public CFStringRef CFStringCreateWithCharacters(Void alloc, char[] chars, int numChars);
+    public NSString CFStringCreateWithCharacters(Void alloc, char[] chars, int numChars);
 
     /**
      * void CFStringGetCharacters ( CFStringRef theString, CFRange range,
@@ -34,7 +34,7 @@ public interface CoreFoundation extends Library {
      * @param range
      * @param buffer
      */
-    public void CFStringGetCharacters(CFStringRef theString, CFRange.ByValue range, Pointer buffer);
+    public void CFStringGetCharacters(NSString theString, CFRange.ByValue range, Pointer buffer);
 
     /**
      * const UniChar * CFStringGetCharactersPtr ( CFStringRef theString );
@@ -42,7 +42,7 @@ public interface CoreFoundation extends Library {
      * @param theString
      * @return
      */
-    public Pointer CFStringGetCharactersPtr(CFStringRef theString);
+    public Pointer CFStringGetCharactersPtr(NSString theString);
 
     /**
      * CFIndex CFStringGetLength ( CFStringRef theString );
@@ -50,7 +50,7 @@ public interface CoreFoundation extends Library {
      * @param theString
      * @return
      */
-    public int CFStringGetLength(CFStringRef theString);
+    public int CFStringGetLength(NSString theString);
 
     //
     // https://developer.apple.com/library/mac/#documentation/CoreFOundation/Reference/CFBundleRef/Reference/reference.html#//apple_ref/c/func/CFBundleGetMainBundle
@@ -69,7 +69,7 @@ public interface CoreFoundation extends Library {
      * @param bundle
      * @return
      */
-    public CFStringRef CFBundleGetIdentifier(Pointer bundle);
+    public NSString CFBundleGetIdentifier(Pointer bundle);
 
     //
     // https://developer.apple.com/library/mac/#documentation/CoreFoundation/Reference/CFArrayRef/Reference/reference.html
@@ -81,7 +81,7 @@ public interface CoreFoundation extends Library {
      * @param theArray
      * @return
      */
-    public int CFArrayGetCount(CFArrayRef theArray);
+    public int CFArrayGetCount(NSArray theArray);
 
     /**
      * const void * CFArrayGetValueAtIndex ( CFArrayRef theArray, CFIndex idx );
@@ -90,5 +90,5 @@ public interface CoreFoundation extends Library {
      * @param idx
      * @return
      */
-    public Pointer CFArrayGetValueAtIndex(CFArrayRef theArray, int idx);
+    public Pointer CFArrayGetValueAtIndex(NSArray theArray, int idx);
 }

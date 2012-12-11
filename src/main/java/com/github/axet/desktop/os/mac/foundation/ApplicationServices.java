@@ -1,6 +1,6 @@
 package com.github.axet.desktop.os.mac.foundation;
 
-import com.github.axet.desktop.os.mac.CFStringRef;
+import com.github.axet.desktop.os.mac.cocoa.NSString;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
@@ -20,7 +20,7 @@ public interface ApplicationServices extends Library {
      * @param inHandlerBundleID
      * @return
      */
-    public int LSSetDefaultRoleHandlerForContentType(CFStringRef inURLScheme, int inRole, CFStringRef inHandlerBundleID);
+    public int LSSetDefaultRoleHandlerForContentType(NSString inURLScheme, int inRole, NSString inHandlerBundleID);
 
     // https://developer.apple.com/library/mac/#documentation/Carbon/Reference/LaunchServicesReference/Reference/reference.html#//apple_ref/c/func/LSSetDefaultHandlerForURLScheme
 
@@ -32,5 +32,5 @@ public interface ApplicationServices extends Library {
      * @param inHandlerBundleID
      * @return
      */
-    public int LSSetDefaultHandlerForURLScheme(CFStringRef inURLScheme, CFStringRef inHandlerBundleID);
+    public int LSSetDefaultHandlerForURLScheme(NSString inURLScheme, NSString inHandlerBundleID);
 }

@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 
+import com.github.axet.desktop.os.mac.cocoa.NSString;
 import com.github.axet.desktop.os.mac.foundation.ApplicationServices;
 
 public class Apple {
@@ -75,7 +76,7 @@ public class Apple {
      *            - bundle id
      */
     public static void setUrlType(String s, String bundleId) {
-        ApplicationServices.INSTANCE.LSSetDefaultHandlerForURLScheme(CFStringRef.CFSTR(s), CFStringRef.CFSTR(bundleId));
+        ApplicationServices.INSTANCE.LSSetDefaultHandlerForURLScheme(new NSString(s), new NSString(bundleId));
     }
 
     /**
@@ -94,8 +95,7 @@ public class Apple {
      *            - bundle ID
      */
     public static void setFileType(String s, String bundleId) {
-        ApplicationServices.INSTANCE.LSSetDefaultRoleHandlerForContentType(CFStringRef.CFSTR(s), -1,
-                CFStringRef.CFSTR(bundleId));
+        ApplicationServices.INSTANCE.LSSetDefaultRoleHandlerForContentType(new NSString(s), -1, new NSString(bundleId));
     }
 
     public static boolean isAvailable() {

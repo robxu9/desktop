@@ -2,6 +2,7 @@ package com.github.axet.desktop;
 
 import com.github.axet.desktop.os.Linux;
 import com.github.axet.desktop.os.mac.OSX;
+import com.github.axet.desktop.os.mac.OSXSysTray;
 import com.github.axet.desktop.os.win.Windows;
 import com.github.axet.desktop.os.win.WindowsSysTray;
 
@@ -35,6 +36,10 @@ public abstract class Desktop {
         if (desktopSysTray == null) {
             if (com.sun.jna.Platform.isWindows()) {
                 desktopSysTray = new WindowsSysTray();
+            }
+
+            if (com.sun.jna.Platform.isMac()) {
+                desktopSysTray = new OSXSysTray();
             }
 
             if (desktopSysTray == null)

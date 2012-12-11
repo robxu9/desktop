@@ -1,4 +1,4 @@
-package com.github.axet.desktop.os.mac;
+package com.github.axet.desktop.os.mac.cocoa;
 
 import java.util.Arrays;
 import java.util.List;
