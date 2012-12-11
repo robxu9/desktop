@@ -4,20 +4,22 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 import net.sf.image4j.codec.ico.ICODecoder;
 
@@ -28,10 +30,12 @@ public class SysTrayTest extends JFrame {
     SysTrayIcon sys = new SysTrayIcon();
     BufferedImage warn;
     BufferedImage stop;
+    JPopupMenu menu;
 
     SysTrayIcon.Listener ml = new SysTrayIcon.Listener() {
         @Override
         public void mouseLeftClick() {
+            System.out.println("left click");
         }
 
         @Override
@@ -41,21 +45,11 @@ public class SysTrayTest extends JFrame {
 
         @Override
         public void mouseRightClick() {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void mouseRightDoubleClick() {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void mouseRightUp() {
             System.out.println("right up");
 
+            sys.showContextMenu();
         }
+
     };
 
     public SysTrayTest() {
@@ -77,16 +71,115 @@ public class SysTrayTest extends JFrame {
             e.printStackTrace();
         }
 
+        menu = new JPopupMenu();
+        JMenuItem menuItem1 = new JMenuItem("test1", new ImageIcon(warn));
+        menuItem1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test1");
+            }
+        });
+        menu.add(menuItem1);
+        menu.addSeparator();
+
+        JMenu menu2 = new JMenu("submenu");
+        menu2.setIcon(new ImageIcon(stop));
+        JMenuItem menuItem21 = new JMenuItem("test21", new ImageIcon(warn));
+        menuItem21.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test21");
+            }
+        });
+        menu2.add(menuItem21);
+        JMenuItem menuItem22 = new JMenuItem("test22", new ImageIcon(warn));
+        menuItem22.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test22");
+            }
+        });
+        menu2.add(menuItem22);
+
+        JMenu menu3 = new JMenu("submenu");
+        menu3.setIcon(new ImageIcon(stop));
+        JMenuItem menuItem31 = new JMenuItem("test31", new ImageIcon(warn));
+        menuItem31.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test31");
+            }
+        });
+        menu3.add(menuItem31);
+        JMenuItem menuItem32 = new JMenuItem("test32", new ImageIcon(warn));
+        menuItem32.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test32");
+            }
+        });
+        menu3.add(menuItem32);
+        menu2.add(menu3);
+
+        menu2.addSeparator();
+        JMenuItem menuItem23 = new JMenuItem("test23", new ImageIcon(warn));
+        menuItem23.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test23");
+            }
+        });
+        menu2.add(menuItem23);
+
+        menu.add(menu2);
+        menu.addSeparator();
+        JMenuItem menuItem2 = new JMenuItem("test2", new ImageIcon(stop));
+        menuItem2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test2");
+            }
+        });
+        menu.add(menuItem2);
+        JMenuItem menuItem3 = new JMenuItem("test3", new ImageIcon(warn));
+        menuItem3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test3");
+            }
+        });
+        menu.add(menuItem3);
+
+        JMenuItem menuItem4 = new JMenuItem("test4", new ImageIcon(warn));
+        menuItem4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test4");
+            }
+        });
+        menuItem4.setEnabled(false);
+        menu.add(menuItem4);
+
+        JCheckBoxMenuItem menuItem5 = new JCheckBoxMenuItem("test5", new ImageIcon(warn));
+        menuItem5.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                System.out.println("test5");
+            }
+        });
+        menu.add(menuItem5);
+
         sys.addListener(ml);
         sys.setIcon(warn);
         sys.setTitle("Java tool2");
+        sys.setMenu(menu);
         sys.show();
 
         this.setSize(new Dimension(400, 400));
         GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
+        gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
         gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-        gridBagLayout.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+        gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
         gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
         getContentPane().setLayout(gridBagLayout);
 
@@ -101,7 +194,7 @@ public class SysTrayTest extends JFrame {
         JLabel lblNewLabel_1 = new JLabel("Stop Label");
         lblNewLabel_1.setIcon(new ImageIcon(stop));
         GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-        gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
+        gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel_1.gridx = 1;
         gbc_lblNewLabel_1.gridy = 0;
         getContentPane().add(lblNewLabel_1, gbc_lblNewLabel_1);
@@ -127,7 +220,7 @@ public class SysTrayTest extends JFrame {
             }
         });
         GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
-        gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
+        gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 5);
         gbc_btnNewButton_1.gridx = 1;
         gbc_btnNewButton_1.gridy = 1;
         getContentPane().add(btnNewButton_1, gbc_btnNewButton_1);
@@ -155,9 +248,24 @@ public class SysTrayTest extends JFrame {
         gbc_btnCreate.gridy = 3;
         getContentPane().add(btnCreate, gbc_btnCreate);
         GridBagConstraints gbc_btnClose = new GridBagConstraints();
+        gbc_btnClose.insets = new Insets(0, 0, 0, 5);
         gbc_btnClose.gridx = 1;
         gbc_btnClose.gridy = 3;
         getContentPane().add(btnClose, gbc_btnClose);
+
+        final JFrame that = this;
+
+        JButton btnShowJmenu = new JButton("Show jmenu");
+        btnShowJmenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Point p = MouseInfo.getPointerInfo().getLocation();
+                menu.show(that, 100, 100);
+            }
+        });
+        GridBagConstraints gbc_btnShowJmenu = new GridBagConstraints();
+        gbc_btnShowJmenu.gridx = 3;
+        gbc_btnShowJmenu.gridy = 3;
+        getContentPane().add(btnShowJmenu, gbc_btnShowJmenu);
         this.setVisible(true);
 
     }

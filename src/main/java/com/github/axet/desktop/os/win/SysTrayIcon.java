@@ -1,13 +1,21 @@
 package com.github.axet.desktop.os.win;
 
+import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import javax.swing.SwingUtilities;
+import javax.swing.Icon;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.os.win.handle.ATOM;
 import com.github.axet.desktop.os.win.handle.ICONINFO;
@@ -25,6 +33,7 @@ import com.sun.jna.platform.win32.WinDef.HBITMAP;
 import com.sun.jna.platform.win32.WinDef.HDC;
 import com.sun.jna.platform.win32.WinDef.HICON;
 import com.sun.jna.platform.win32.WinDef.HINSTANCE;
+import com.sun.jna.platform.win32.WinDef.HMENU;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
@@ -44,10 +53,6 @@ public class SysTrayIcon {
         public void mouseLeftDoubleClick();
 
         public void mouseRightClick();
-
-        public void mouseRightDoubleClick();
-
-        public void mouseRightUp();
     }
 
     public static final int WM_TASKBARCREATED = User32Ex.INSTANCE.RegisterWindowMessage("TaskbarCreated");
@@ -58,12 +63,22 @@ public class SysTrayIcon {
     public static final int WM_SIZE = 5;
     public static final int WM_MOVE = 3;
     public static final int WM_USER = 1024;
+    public static final int WM_LBUTTONUP = 0x0202;
     public static final int WM_LBUTTONDBLCLK = 515;
     public static final int WM_RBUTTONUP = 517;
     public static final int WM_QUIT = 0x0012;
     public static final int WM_CLOSE = 0x0010;
-
+    public static final int WM_NULL = 0x0000;
     public static final int SW_SHOW = 5;
+
+    public static final int MF_ENABLED = 0;
+    public static final int MF_DISABLED = 0x00000002;
+    public static final int MF_GRAYED = 0x00000001;
+    public static final int MF_STRING = 0x00000000;
+    public static final int MF_SEPARATOR = 0x00000800;
+    public static final int MF_POPUP = 0x00000010;
+
+    public static final int TPM_RIGHTBUTTON = 0x0002;
 
     public class MessagePump implements Runnable {
         Thread t;
@@ -95,6 +110,11 @@ public class SysTrayIcon {
             WndProc = new WNDPROC() {
                 public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
                     switch (lParam.intValue()) {
+                    case WM_LBUTTONUP:
+                        for (Listener l : Collections.synchronizedCollection(listeners)) {
+                            l.mouseLeftClick();
+                        }
+                        break;
                     case WM_LBUTTONDBLCLK:
                         for (Listener l : Collections.synchronizedCollection(listeners)) {
                             l.mouseLeftDoubleClick();
@@ -102,17 +122,17 @@ public class SysTrayIcon {
                         break;
                     case WM_RBUTTONUP:
                         for (Listener l : Collections.synchronizedCollection(listeners)) {
-                            l.mouseRightUp();
+                            l.mouseRightClick();
                         }
+                        break;
+                    case WM_QUIT:
+                        User32.INSTANCE.PostQuitMessage(0);
                         break;
                     }
 
                     if (uMsg == WM_TASKBARCREATED) {
-                        update();
+                        show();
                     }
-
-                    if (uMsg == WM_QUIT)
-                        User32.INSTANCE.PostQuitMessage(0);
 
                     return User32Ex.INSTANCE.DefWindowProc(hWnd, uMsg, wParam, lParam);
                 }
@@ -192,6 +212,16 @@ public class SysTrayIcon {
         }
     }
 
+    static class MenuMap {
+        public HBITMAP hbm;
+        public JMenuItem item;
+
+        public MenuMap(JMenuItem item, HBITMAP hbm) {
+            this.hbm = hbm;
+            this.item = item;
+        }
+    }
+
     static int count = 0;
     static MessagePump mp;
 
@@ -199,9 +229,13 @@ public class SysTrayIcon {
 
     BufferedImage icon;
     String title;
+    JPopupMenu menu;
 
     HBITMAP hbm;
     HICON hico;
+    List<HMENU> hmenus = new ArrayList<HMENU>();
+    // position in this list == id of HMENU item
+    List<MenuMap> hmenusids = new ArrayList<MenuMap>();
 
     Set<Listener> listeners = new HashSet<Listener>();
 
@@ -226,6 +260,7 @@ public class SysTrayIcon {
             GDI32.INSTANCE.DeleteObject(hico);
             hico = null;
         }
+        clearMenus();
 
         if (!close) {
             close = true;
@@ -252,6 +287,14 @@ public class SysTrayIcon {
         super.finalize();
 
         close();
+    }
+
+    HBITMAP createBitmap(Icon icon) {
+        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = bi.createGraphics();
+        icon.paintIcon(null, g, 0, 0);
+        g.dispose();
+        return createBitmap(bi);
     }
 
     // https://github.com/twall/jna/blob/master/contrib/alphamaskdemo/com/sun/jna/contrib/demo/AlphaMaskDemo.java
@@ -327,6 +370,117 @@ public class SysTrayIcon {
         title = t;
     }
 
+    void clearMenus() {
+        for (HMENU hmenu : hmenus) {
+            User32Ex.INSTANCE.DestroyMenu(hmenu);
+        }
+        hmenus.clear();
+    }
+
+    public void setMenu(JPopupMenu menu) {
+        this.menu = menu;
+
+        clearMenus();
+
+        HMENU hmenu = User32Ex.INSTANCE.CreatePopupMenu();
+        hmenus.add(hmenu);
+
+        for (int i = 0; i < menu.getComponentCount(); i++) {
+            Component e = menu.getComponent(i);
+
+            if (e instanceof JMenu) {
+                JMenu sub = (JMenu) e;
+                HMENU hsub = createSubmenu(sub);
+
+                HBITMAP bm = null;
+                if (sub.getIcon() != null)
+                    bm = createBitmap(sub.getIcon());
+                hmenusids.add(new MenuMap(sub, bm));
+
+                // you know, the usual windows tricks (transfer handle to
+                // decimal)
+                int handle = (int) Pointer.nativeValue(hsub.getPointer());
+
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MF_POPUP, handle, sub.getText()))
+                    throw new GetLastErrorException();
+                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hmenu, handle, 0, bm, bm))
+                    throw new GetLastErrorException();
+
+                hmenus.add(hsub);
+            } else if (e instanceof JMenuItem) {
+                JMenuItem mi = (JMenuItem) e;
+
+                int nID = hmenusids.size();
+                HBITMAP bm = null;
+                if (mi.getIcon() != null)
+                    bm = createBitmap(mi.getIcon());
+                hmenusids.add(new MenuMap(mi, bm));
+
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, mi.isEnabled() ? MF_ENABLED : MF_GRAYED | MF_STRING, nID,
+                        mi.getText()))
+                    throw new GetLastErrorException();
+                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hmenu, nID, 0, bm, bm))
+                    throw new GetLastErrorException();
+            }
+
+            if (e instanceof JPopupMenu.Separator) {
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MF_SEPARATOR, 0, null))
+                    throw new GetLastErrorException();
+            }
+        }
+    }
+
+    HMENU createSubmenu(JMenu menu) {
+        HMENU hsub = User32Ex.INSTANCE.CreatePopupMenu();
+
+        for (int i = 0; i < menu.getMenuComponentCount(); i++) {
+            Component e = menu.getMenuComponent(i);
+
+            if (e instanceof JMenu) {
+                JMenu sub = (JMenu) e;
+                HMENU hsub2 = createSubmenu(sub);
+
+                // you know, the usual windows tricks (transfer handle to
+                // decimal)
+                int handle = (int) Pointer.nativeValue(hsub2.getPointer());
+
+                HBITMAP bm = null;
+                if (sub.getIcon() != null)
+                    bm = createBitmap(sub.getIcon());
+                hmenusids.add(new MenuMap(sub, bm));
+
+                if (!User32Ex.INSTANCE.AppendMenu(hsub, MF_POPUP, handle, sub.getText()))
+                    throw new GetLastErrorException();
+                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hsub, handle, 0, bm, bm))
+                    throw new GetLastErrorException();
+
+                hmenus.add(hsub2);
+            } else if (e instanceof JMenuItem) {
+                JMenuItem mi = (JMenuItem) e;
+
+                int nID = hmenusids.size();
+                HBITMAP bm = null;
+                if (mi.getIcon() != null)
+                    bm = createBitmap(mi.getIcon());
+                hmenusids.add(new MenuMap(mi, bm));
+
+                if (!User32Ex.INSTANCE.AppendMenu(hsub, mi.isEnabled() ? MF_ENABLED : MF_GRAYED | MF_STRING, nID,
+                        mi.getText()))
+                    throw new GetLastErrorException();
+                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hsub, nID, 0, bm, bm))
+                    throw new GetLastErrorException();
+            }
+
+            if (e instanceof JPopupMenu.Separator) {
+                if (!User32Ex.INSTANCE.AppendMenu(hsub, MF_SEPARATOR, 0, null))
+                    throw new GetLastErrorException();
+            }
+        }
+
+        return hsub;
+
+    }
+
     public void show() {
         if (hbm != null) {
             GDI32.INSTANCE.DeleteObject(hbm);
@@ -377,8 +531,14 @@ public class SysTrayIcon {
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
         nid.hWnd = mp.hWnd;
 
-        boolean res = Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_DELETE, nid);
-        if (!res)
+        if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_DELETE, nid))
             throw new GetLastErrorException();
+    }
+
+    public void showContextMenu() {
+        Point p = MouseInfo.getPointerInfo().getLocation();
+        if (!User32Ex.INSTANCE.TrackPopupMenu(hmenus.get(0), TPM_RIGHTBUTTON, p.x, p.y, 0, mp.hWnd, null))
+            throw new GetLastErrorException();
+        User32.INSTANCE.PostMessage(mp.hWnd, WM_NULL, null, null);
     }
 }

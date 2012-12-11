@@ -5,12 +5,14 @@ import com.github.axet.desktop.os.win.handle.ICONINFO;
 import com.github.axet.desktop.os.win.handle.WNDCLASSEX;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.platform.win32.WinDef.HBITMAP;
 import com.sun.jna.platform.win32.WinDef.HICON;
 import com.sun.jna.platform.win32.WinDef.HINSTANCE;
 import com.sun.jna.platform.win32.WinDef.HMENU;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
+import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.win32.W32APIOptions;
@@ -95,4 +97,40 @@ public interface User32Ex extends Library {
      * wParam, _In_ LPARAM lParam );
      */
     LRESULT SendMessage(HWND hWnd, int Msg, WPARAM wParam, LPARAM lParam);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms647626(v=vs.85).aspx
+    /**
+     * HMENU WINAPI CreatePopupMenu(void);
+     */
+    HMENU CreatePopupMenu();
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms647616(v=vs.85).aspx
+    /**
+     * BOOL WINAPI AppendMenu( _In_ HMENU hMenu, _In_ UINT uFlags, _In_ UINT_PTR
+     * uIDNewItem, _In_opt_ LPCTSTR lpNewItem );
+     */
+    boolean AppendMenu(HMENU hMenu, int uFlags, int uIDNewItem, String lpNewItem);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms647998(v=vs.85).aspx
+    /**
+     * BOOL WINAPI SetMenuItemBitmaps( _In_ HMENU hMenu, _In_ UINT uPosition,
+     * _In_ UINT uFlags, _In_opt_ HBITMAP hBitmapUnchecked, _In_opt_ HBITMAP
+     * hBitmapChecked );
+     */
+    boolean SetMenuItemBitmaps(HMENU hMenu, int uPosition, int uFlags, HBITMAP hBitmapUnchecked, HBITMAP hBitmapChecked);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms647631(v=vs.85).aspx
+    /**
+     * BOOL WINAPI DestroyMenu( _In_ HMENU hMenu );
+     */
+    boolean DestroyMenu(HMENU hMenu);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms648002(v=vs.85).aspx
+    /**
+     * BOOL WINAPI TrackPopupMenu( _In_ HMENU hMenu, _In_ UINT uFlags, _In_ int
+     * x, _In_ int y, _In_ int nReserved, _In_ HWND hWnd, _In_opt_ const RECT
+     * *prcRect );
+     */
+    boolean TrackPopupMenu(HMENU hMenu, int uFlags, int x, int y, int nReserved, HWND hWnd, RECT prcRect);
+
 }
