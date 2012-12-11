@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.DesktopSysTray;
@@ -56,13 +57,13 @@ public class OSXSysTray extends DesktopSysTray {
 
     @Override
     public void show() {
-        try {
-            BufferedImage bi = createBitmap(icon);
-            ByteArrayOutputStream bufio = new ByteArrayOutputStream();
-            ImageIO.write(bi, "JPG", bufio);
-            byte[] buf = bufio.toByteArray();
-            NSData data = new NSData(buf);
-            NSImage n = new NSImage(data);
+//        try {
+//            BufferedImage bi = createBitmap(icon);
+//            ByteArrayOutputStream bufio = new ByteArrayOutputStream();
+//            ImageIO.write(bi, "JPG", bufio);
+//            byte[] buf = bufio.toByteArray();
+//            NSData data = new NSData(buf);
+//            NSImage n = new NSImage(data);
 
             NSMenu m = new NSMenu();
 
@@ -73,12 +74,14 @@ public class OSXSysTray extends DesktopSysTray {
             NSStatusBar b = new NSStatusBar();
             NSStatusItem i = b.statusItemWithLength(NSVariableStatusItemLength);
             i.setTitle(new NSString("absdgasfds afdsaf ad"));
-            i.setImage(n);
+//            i.setImage(n);
             i.setHighlightMode(true);
             i.setMenu(m);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            
+            JOptionPane.showMessageDialog(null, "done");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     @Override

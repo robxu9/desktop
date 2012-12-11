@@ -13,6 +13,8 @@ public class NSStatusBar extends NSObject {
 
     static Pointer statusItemWithLength = Runtime.INSTANCE.sel_getUid("statusItemWithLength:");
 
+    static Pointer removeStatusItem = Runtime.INSTANCE.sel_getUid("removeStatusItem:");
+
     public NSStatusBar() {
         super(Runtime.INSTANCE.objc_msgSend(klass, systemStatusBar));
 
@@ -31,6 +33,10 @@ public class NSStatusBar extends NSObject {
 
     public NSStatusItem statusItemWithLength(long i) {
         return new NSStatusItem(Runtime.INSTANCE.objc_msgSend(this, statusItemWithLength, i));
+    }
+
+    public void removeStatusItem(NSStatusItem i) {
+        Runtime.INSTANCE.objc_msgSend(this, removeStatusItem, i);
     }
 
 }

@@ -21,6 +21,12 @@ public class NSString extends NSObject {
         retain();
     }
 
+    public NSString(long l) {
+        super(l);
+
+        retain();
+    }
+
     public NSString(Pointer p) {
         super(Pointer.nativeValue(p));
 

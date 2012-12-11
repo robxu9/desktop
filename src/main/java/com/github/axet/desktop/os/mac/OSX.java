@@ -5,8 +5,8 @@ import java.lang.reflect.Method;
 
 import com.github.axet.desktop.DesktopFolders;
 import com.github.axet.desktop.os.mac.cocoa.NSArray;
-import com.github.axet.desktop.os.mac.cocoa.NSString;
-import com.github.axet.desktop.os.mac.foundation.NSFileNanager;
+import com.github.axet.desktop.os.mac.cocoa.NSFileManager;
+import com.github.axet.desktop.os.mac.cocoa.NSURL;
 
 public class OSX implements DesktopFolders {
 
@@ -35,17 +35,17 @@ public class OSX implements DesktopFolders {
 
     @Override
     public File getDownloads() {
-        NSArray a = new NSArray(NSFileNanager.INSTANCE.NSSearchPathForDirectoriesInDomains(
-                NSFileNanager.NSSearchPathDirectory.NSDownloadsDirectory,
-                NSFileNanager.NSSearchPathDomainMask.NSUserDomainMask, true));
+        NSFileManager f = new NSFileManager();
+        NSArray a = f.URLsForDirectoryInDomains(NSFileManager.NSSearchPathDirectory.NSDownloadsDirectory,
+                NSFileManager.NSSearchPathDomainMask.NSUserDomainMask);
 
         long count = a.count();
         if (count != 1)
             throw new RuntimeException("Download folder not found");
 
-        NSString path = new NSString(a.objectAtIndex(0));
+        NSURL path = new NSURL(a.objectAtIndex(0));
 
-        return new File(path.toString());
+        return new File(path.path().toString());
     }
 
     private static Class<?> FileManagerClass;
