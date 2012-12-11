@@ -1,5 +1,6 @@
 package com.github.axet.desktop.os.win;
 
+import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.Icon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -70,9 +72,13 @@ public class SysTrayIcon {
     public static final int WM_CLOSE = 0x0010;
     public static final int WM_NULL = 0x0000;
     public static final int SW_SHOW = 5;
+    public static final int WM_COMMAND = 0x0111;
+    public static final int WM_SHELLNOTIFY = WM_USER + 1;
 
     public static final int MF_ENABLED = 0;
     public static final int MF_DISABLED = 0x00000002;
+    public static final int MF_CHECKED = 0x00000008;
+    public static final int MF_UNCHECKED = 0;
     public static final int MF_GRAYED = 0x00000001;
     public static final int MF_STRING = 0x00000000;
     public static final int MF_SEPARATOR = 0x00000800;
@@ -108,33 +114,43 @@ public class SysTrayIcon {
 
         void create() {
             WndProc = new WNDPROC() {
-                public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
-                    switch (lParam.intValue()) {
-                    case WM_LBUTTONUP:
-                        for (Listener l : Collections.synchronizedCollection(listeners)) {
-                            l.mouseLeftClick();
+                public LRESULT callback(HWND hWnd, int msg, WPARAM wParam, LPARAM lParam) {
+                    switch (msg) {
+                    case WM_SHELLNOTIFY:
+                        switch (lParam.intValue()) {
+                        case WM_LBUTTONUP:
+                            for (Listener l : Collections.synchronizedCollection(listeners)) {
+                                l.mouseLeftClick();
+                            }
+                            break;
+                        case WM_LBUTTONDBLCLK:
+                            for (Listener l : Collections.synchronizedCollection(listeners)) {
+                                l.mouseLeftDoubleClick();
+                            }
+                            break;
+                        case WM_RBUTTONUP:
+                            for (Listener l : Collections.synchronizedCollection(listeners)) {
+                                l.mouseRightClick();
+                            }
+                            break;
                         }
                         break;
-                    case WM_LBUTTONDBLCLK:
-                        for (Listener l : Collections.synchronizedCollection(listeners)) {
-                            l.mouseLeftDoubleClick();
-                        }
+                    case WM_COMMAND: {
+                        int nID = wParam.intValue() & 0xff;
+                        MenuMap m = hmenusids.get(nID);
+                        m.fire();
                         break;
-                    case WM_RBUTTONUP:
-                        for (Listener l : Collections.synchronizedCollection(listeners)) {
-                            l.mouseRightClick();
-                        }
-                        break;
+                    }
                     case WM_QUIT:
                         User32.INSTANCE.PostQuitMessage(0);
                         break;
                     }
 
-                    if (uMsg == WM_TASKBARCREATED) {
+                    if (msg == WM_TASKBARCREATED) {
                         show();
                     }
 
-                    return User32Ex.INSTANCE.DefWindowProc(hWnd, uMsg, wParam, lParam);
+                    return User32Ex.INSTANCE.DefWindowProc(hWnd, msg, wParam, lParam);
                 }
             };
             hWnd = createWindow();
@@ -219,6 +235,10 @@ public class SysTrayIcon {
         public MenuMap(JMenuItem item, HBITMAP hbm) {
             this.hbm = hbm;
             this.item = item;
+        }
+
+        public void fire() {
+            item.doClick();
         }
     }
 
@@ -375,11 +395,17 @@ public class SysTrayIcon {
             User32Ex.INSTANCE.DestroyMenu(hmenu);
         }
         hmenus.clear();
+        for (MenuMap m : hmenusids) {
+            GDI32.INSTANCE.DeleteObject(m.hbm);
+        }
+        hmenusids.clear();
     }
 
     public void setMenu(JPopupMenu menu) {
         this.menu = menu;
+    }
 
+    void updateMenus() {
         clearMenus();
 
         HMENU hmenu = User32Ex.INSTANCE.CreatePopupMenu();
@@ -407,6 +433,19 @@ public class SysTrayIcon {
                     throw new GetLastErrorException();
 
                 hmenus.add(hsub);
+            } else if (e instanceof JCheckBoxMenuItem) {
+                JCheckBoxMenuItem ch = (JCheckBoxMenuItem) e;
+
+                int nID = hmenusids.size();
+                HBITMAP bm = null;
+                if (ch.getIcon() != null)
+                    bm = createBitmap(ch.getIcon());
+                hmenusids.add(new MenuMap(ch, bm));
+
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
+                        | (ch.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID, ch.getText()))
+                    throw new GetLastErrorException();
+
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
 
@@ -416,7 +455,7 @@ public class SysTrayIcon {
                     bm = createBitmap(mi.getIcon());
                 hmenusids.add(new MenuMap(mi, bm));
 
-                if (!User32Ex.INSTANCE.AppendMenu(hmenu, mi.isEnabled() ? MF_ENABLED : MF_GRAYED | MF_STRING, nID,
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, (mi.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID,
                         mi.getText()))
                     throw new GetLastErrorException();
                 if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hmenu, nID, 0, bm, bm))
@@ -455,6 +494,19 @@ public class SysTrayIcon {
                     throw new GetLastErrorException();
 
                 hmenus.add(hsub2);
+            } else if (e instanceof JCheckBoxMenuItem) {
+                JCheckBoxMenuItem ch = (JCheckBoxMenuItem) e;
+
+                int nID = hmenusids.size();
+                HBITMAP bm = null;
+                if (ch.getIcon() != null)
+                    bm = createBitmap(ch.getIcon());
+                hmenusids.add(new MenuMap(ch, bm));
+
+                if (!User32Ex.INSTANCE.AppendMenu(hsub, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
+                        | (ch.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID, ch.getText()))
+                    throw new GetLastErrorException();
+
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
 
@@ -464,7 +516,7 @@ public class SysTrayIcon {
                     bm = createBitmap(mi.getIcon());
                 hmenusids.add(new MenuMap(mi, bm));
 
-                if (!User32Ex.INSTANCE.AppendMenu(hsub, mi.isEnabled() ? MF_ENABLED : MF_GRAYED | MF_STRING, nID,
+                if (!User32Ex.INSTANCE.AppendMenu(hsub, (mi.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID,
                         mi.getText()))
                     throw new GetLastErrorException();
                 if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hsub, nID, 0, bm, bm))
@@ -497,7 +549,7 @@ public class SysTrayIcon {
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
         nid.setTooltip(title);
         nid.hWnd = mp.hWnd;
-        nid.uCallbackMessage = WM_USER + 1;
+        nid.uCallbackMessage = WM_SHELLNOTIFY;
         nid.hIcon = hico;
 
         if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_ADD, nid))
@@ -520,7 +572,7 @@ public class SysTrayIcon {
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
         nid.setTooltip(title);
         nid.hWnd = mp.hWnd;
-        nid.uCallbackMessage = WM_USER + 1;
+        nid.uCallbackMessage = WM_SHELLNOTIFY;
         nid.hIcon = hico;
 
         if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_MODIFY, nid))
@@ -536,9 +588,13 @@ public class SysTrayIcon {
     }
 
     public void showContextMenu() {
+        updateMenus();
+        User32.INSTANCE.SetForegroundWindow(mp.hWnd);
+
         Point p = MouseInfo.getPointerInfo().getLocation();
         if (!User32Ex.INSTANCE.TrackPopupMenu(hmenus.get(0), TPM_RIGHTBUTTON, p.x, p.y, 0, mp.hWnd, null))
             throw new GetLastErrorException();
+
         User32.INSTANCE.PostMessage(mp.hWnd, WM_NULL, null, null);
     }
 }

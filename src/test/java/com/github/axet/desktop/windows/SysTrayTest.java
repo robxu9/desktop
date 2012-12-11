@@ -45,8 +45,6 @@ public class SysTrayTest extends JFrame {
 
         @Override
         public void mouseRightClick() {
-            System.out.println("right up");
-
             sys.showContextMenu();
         }
 
