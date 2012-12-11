@@ -1,6 +1,5 @@
 package com.github.axet.desktop.os.win;
 
-import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
@@ -19,6 +18,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import com.github.axet.desktop.DesktopSysTray;
 import com.github.axet.desktop.os.win.handle.ATOM;
 import com.github.axet.desktop.os.win.handle.ICONINFO;
 import com.github.axet.desktop.os.win.handle.NOTIFYICONDATA;
@@ -47,15 +47,7 @@ import com.sun.jna.ptr.PointerByReference;
 
 // http://www.nevaobject.com/_docs/_coroutine/coroutine.htm
 
-public class SysTrayIcon {
-
-    public interface Listener {
-        public void mouseLeftClick();
-
-        public void mouseLeftDoubleClick();
-
-        public void mouseRightClick();
-    }
+public class WindowsSysTray extends DesktopSysTray {
 
     public static final int WM_TASKBARCREATED = User32Ex.INSTANCE.RegisterWindowMessage("TaskbarCreated");
     public static final int WM_LBUTTONDOWN = 513;
@@ -247,7 +239,7 @@ public class SysTrayIcon {
 
     boolean close = false;
 
-    BufferedImage icon;
+    Icon icon;
     String title;
     JPopupMenu menu;
 
@@ -257,9 +249,7 @@ public class SysTrayIcon {
     // position in this list == id of HMENU item
     List<MenuMap> hmenusids = new ArrayList<MenuMap>();
 
-    Set<Listener> listeners = new HashSet<Listener>();
-
-    public SysTrayIcon() {
+    public WindowsSysTray() {
         create();
     }
 
@@ -293,14 +283,6 @@ public class SysTrayIcon {
                 }
             }
         }
-    }
-
-    public void addListener(Listener l) {
-        listeners.add(l);
-    }
-
-    public void removeListener(Listener l) {
-        listeners.remove(l);
     }
 
     protected void finalize() throws Throwable {
@@ -382,7 +364,7 @@ public class SysTrayIcon {
         return hicon;
     }
 
-    public void setIcon(BufferedImage icon) {
+    public void setIcon(Icon icon) {
         this.icon = icon;
     }
 

@@ -3,10 +3,10 @@ package com.github.axet.desktop.os.mac;
 import java.io.File;
 import java.lang.reflect.Method;
 
-import com.github.axet.desktop.Desktop;
+import com.github.axet.desktop.DesktopFolders;
 import com.github.axet.desktop.os.mac.foundation.NSFileNanager;
 
-public class OSX extends Desktop {
+public class OSX implements DesktopFolders {
 
     @Override
     public File getAppData() {

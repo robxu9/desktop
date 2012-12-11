@@ -23,16 +23,17 @@ import javax.swing.JPopupMenu;
 
 import net.sf.image4j.codec.ico.ICODecoder;
 
-import com.github.axet.desktop.os.win.SysTrayIcon;
+import com.github.axet.desktop.DesktopSysTray;
+import com.github.axet.desktop.os.win.WindowsSysTray;
 
 public class SysTrayTest extends JFrame {
 
-    SysTrayIcon sys = new SysTrayIcon();
-    BufferedImage warn;
-    BufferedImage stop;
+    DesktopSysTray sys = new WindowsSysTray();
+    ImageIcon warn;
+    ImageIcon stop;
     JPopupMenu menu;
 
-    SysTrayIcon.Listener ml = new SysTrayIcon.Listener() {
+    DesktopSysTray.Listener ml = new DesktopSysTray.Listener() {
         @Override
         public void mouseLeftClick() {
             System.out.println("left click");
@@ -58,11 +59,11 @@ public class SysTrayTest extends JFrame {
         try {
             InputStream is = SysTrayTest.class.getResourceAsStream("bug.ico");
             List<BufferedImage> bmp = ICODecoder.read(is);
-            warn = bmp.get(0);
+            warn = new ImageIcon(bmp.get(0));
 
             is = SysTrayTest.class.getResourceAsStream("dov.ico");
             bmp = ICODecoder.read(is);
-            stop = bmp.get(0);
+            stop = new ImageIcon(bmp.get(0));
         } catch (RuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -70,7 +71,7 @@ public class SysTrayTest extends JFrame {
         }
 
         menu = new JPopupMenu();
-        JMenuItem menuItem1 = new JMenuItem("test1", new ImageIcon(warn));
+        JMenuItem menuItem1 = new JMenuItem("test1", warn);
         menuItem1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -81,8 +82,8 @@ public class SysTrayTest extends JFrame {
         menu.addSeparator();
 
         JMenu menu2 = new JMenu("submenu");
-        menu2.setIcon(new ImageIcon(stop));
-        JMenuItem menuItem21 = new JMenuItem("test21", new ImageIcon(warn));
+        menu2.setIcon(stop);
+        JMenuItem menuItem21 = new JMenuItem("test21", warn);
         menuItem21.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -90,7 +91,7 @@ public class SysTrayTest extends JFrame {
             }
         });
         menu2.add(menuItem21);
-        JMenuItem menuItem22 = new JMenuItem("test22", new ImageIcon(warn));
+        JMenuItem menuItem22 = new JMenuItem("test22", warn);
         menuItem22.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -100,8 +101,8 @@ public class SysTrayTest extends JFrame {
         menu2.add(menuItem22);
 
         JMenu menu3 = new JMenu("submenu");
-        menu3.setIcon(new ImageIcon(stop));
-        JMenuItem menuItem31 = new JMenuItem("test31", new ImageIcon(warn));
+        menu3.setIcon(stop);
+        JMenuItem menuItem31 = new JMenuItem("test31", warn);
         menuItem31.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -109,7 +110,7 @@ public class SysTrayTest extends JFrame {
             }
         });
         menu3.add(menuItem31);
-        JMenuItem menuItem32 = new JMenuItem("test32", new ImageIcon(warn));
+        JMenuItem menuItem32 = new JMenuItem("test32", warn);
         menuItem32.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -120,7 +121,7 @@ public class SysTrayTest extends JFrame {
         menu2.add(menu3);
 
         menu2.addSeparator();
-        JMenuItem menuItem23 = new JMenuItem("test23", new ImageIcon(warn));
+        JMenuItem menuItem23 = new JMenuItem("test23", warn);
         menuItem23.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -131,7 +132,7 @@ public class SysTrayTest extends JFrame {
 
         menu.add(menu2);
         menu.addSeparator();
-        JMenuItem menuItem2 = new JMenuItem("test2", new ImageIcon(stop));
+        JMenuItem menuItem2 = new JMenuItem("test2", stop);
         menuItem2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -139,7 +140,7 @@ public class SysTrayTest extends JFrame {
             }
         });
         menu.add(menuItem2);
-        JMenuItem menuItem3 = new JMenuItem("test3", new ImageIcon(warn));
+        JMenuItem menuItem3 = new JMenuItem("test3", warn);
         menuItem3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -148,7 +149,7 @@ public class SysTrayTest extends JFrame {
         });
         menu.add(menuItem3);
 
-        JMenuItem menuItem4 = new JMenuItem("test4", new ImageIcon(warn));
+        JMenuItem menuItem4 = new JMenuItem("test4", warn);
         menuItem4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -158,7 +159,7 @@ public class SysTrayTest extends JFrame {
         menuItem4.setEnabled(false);
         menu.add(menuItem4);
 
-        JCheckBoxMenuItem menuItem5 = new JCheckBoxMenuItem("test5", new ImageIcon(warn));
+        JCheckBoxMenuItem menuItem5 = new JCheckBoxMenuItem("test5", warn);
         menuItem5.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -182,7 +183,7 @@ public class SysTrayTest extends JFrame {
         getContentPane().setLayout(gridBagLayout);
 
         JLabel lblNewLabel = new JLabel("Warn Label");
-        lblNewLabel.setIcon(new ImageIcon(warn));
+        lblNewLabel.setIcon(warn);
         GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
         gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel.gridx = 0;
@@ -190,7 +191,7 @@ public class SysTrayTest extends JFrame {
         getContentPane().add(lblNewLabel, gbc_lblNewLabel);
 
         JLabel lblNewLabel_1 = new JLabel("Stop Label");
-        lblNewLabel_1.setIcon(new ImageIcon(stop));
+        lblNewLabel_1.setIcon(stop);
         GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
         gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel_1.gridx = 1;
@@ -233,7 +234,7 @@ public class SysTrayTest extends JFrame {
         JButton btnCreate = new JButton("Create");
         btnCreate.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                sys = new SysTrayIcon();
+                sys = new WindowsSysTray();
                 sys.addListener(ml);
                 sys.setIcon(warn);
                 sys.setTitle("Java tool2");

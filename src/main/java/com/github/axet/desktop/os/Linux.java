@@ -11,11 +11,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.github.axet.desktop.Desktop;
+import com.github.axet.desktop.DesktopFolders;
 
 // man xdg-user-dirs
 
-public class Linux extends Desktop {
+public class Linux implements DesktopFolders {
 
     File rootFile = new File("/etc/xdg/user-dirs.conf");
     Map<String, String> root;

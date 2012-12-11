@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.apache.commons.lang.SystemUtils;
 
-import com.github.axet.desktop.Desktop;
+import com.github.axet.desktop.DesktopFolders;
 import com.github.axet.desktop.os.win.libs.Ole32Ex;
 import com.github.axet.desktop.os.win.libs.Shell32Ex;
 import com.sun.jna.platform.win32.WinDef.HWND;
@@ -18,7 +18,7 @@ import com.sun.jna.ptr.PointerByReference;
  * users-home-directory-in-java
  * 
  */
-public class Windows extends Desktop {
+public class Windows implements DesktopFolders {
 
     public File getHome() {
         return new File(System.getenv("USERPROFILE"));

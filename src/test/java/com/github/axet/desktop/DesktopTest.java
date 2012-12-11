@@ -2,7 +2,7 @@ package com.github.axet.desktop;
 
 public class DesktopTest {
     public static void main(String[] args) {
-        Desktop d = Desktop.desktop();
+        DesktopFolders d = Desktop.getDesktopFolders();
 
         System.out.println("Home: " + d.getHome());
         System.out.println("Documents: " + d.getDocuments());

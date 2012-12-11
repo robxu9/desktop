@@ -1,48 +1,47 @@
 package com.github.axet.desktop;
 
-import java.io.File;
-
 import com.github.axet.desktop.os.Linux;
 import com.github.axet.desktop.os.mac.OSX;
 import com.github.axet.desktop.os.win.Windows;
+import com.github.axet.desktop.os.win.WindowsSysTray;
 
 public abstract class Desktop {
 
-    static Desktop desktop = null;
+    static DesktopFolders desktopFolders = null;
+    static DesktopSysTray desktopSysTray = null;
 
-    public static Desktop desktop() {
-        if (desktop == null) {
+    public static DesktopFolders getDesktopFolders() {
+        if (desktopFolders == null) {
             if (com.sun.jna.Platform.isWindows()) {
-                desktop = new Windows();
+                desktopFolders = new Windows();
             }
 
             if (com.sun.jna.Platform.isMac()) {
-                desktop = new OSX();
+                desktopFolders = new OSX();
             }
 
             if (com.sun.jna.Platform.isLinux()) {
-                desktop = new Linux();
+                desktopFolders = new Linux();
             }
 
-            if (desktop == null)
+            if (desktopFolders == null)
                 throw new RuntimeException("OS not supported");
         }
 
-        return desktop;
+        return desktopFolders;
     }
 
-    // user application data folder
-    abstract public File getAppData();
+    public static DesktopSysTray getDesktopSysTray() {
+        if (desktopSysTray == null) {
+            if (com.sun.jna.Platform.isWindows()) {
+                desktopSysTray = new WindowsSysTray();
+            }
 
-    // user home
-    abstract public File getHome();
+            if (desktopSysTray == null)
+                throw new RuntimeException("OS not supported");
+        }
 
-    // user my documents
-    abstract public File getDocuments();
+        return desktopSysTray;
+    }
 
-    // user downloads
-    abstract public File getDownloads();
-
-    // user desktop
-    abstract public File getDesktop();
 }
