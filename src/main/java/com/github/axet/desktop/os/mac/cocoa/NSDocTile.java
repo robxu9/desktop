@@ -8,23 +8,14 @@ import com.sun.jna.Pointer;
 public class NSDocTile extends NSObject {
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSDocTile");
-
     static Pointer setBadgeLabel = Runtime.INSTANCE.sel_getUid("setBadgeLabel:");
 
     public NSDocTile(Pointer p) {
         super(Pointer.nativeValue(p));
-
-        retain();
     }
 
     public NSDocTile(long l) {
         super(l);
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
     public void setBadgeLabel(NSString label) {

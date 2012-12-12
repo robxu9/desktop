@@ -20,18 +20,19 @@ public class OSXSysTrayAction extends NSObject {
     static {
         final Pointer klass = Runtime.INSTANCE.objc_allocateClassPair(NSObject.klass,
                 OSXSysTrayAction.class.getSimpleName(), 0);
+
         final Pointer action = Runtime.INSTANCE.sel_registerName("action");
 
-        boolean add = Runtime.INSTANCE.class_addMethod(klass, action, new Action() {
+        Action a = new Action() {
             public void callback(Pointer self, Pointer selector) {
                 if (selector.equals(action)) {
                     OSXSysTrayAction a = map.get(Pointer.nativeValue(self));
                     a.mi.doClick();
                 }
             }
-        }, "");
+        };
 
-        if (!add)
+        if (!Runtime.INSTANCE.class_addMethod(klass, action, a, "v@:"))
             throw new RuntimeException("problem initalizing class");
 
         Runtime.INSTANCE.objc_registerClassPair(klass);

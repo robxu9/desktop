@@ -7,28 +7,24 @@ import com.sun.jna.Pointer;
 
 public class NSStatusBar extends NSObject {
 
+    public final static int NSVariableStatusItemLength = -1;
+    public final static int NSSquareStatusItemLength = -2;
+
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSStatusBar");
-
     static Pointer systemStatusBar = Runtime.INSTANCE.sel_getUid("systemStatusBar");
-
     static Pointer statusItemWithLength = Runtime.INSTANCE.sel_getUid("statusItemWithLength:");
-
     static Pointer removeStatusItem = Runtime.INSTANCE.sel_getUid("removeStatusItem:");
 
-    public NSStatusBar() {
-        super(Runtime.INSTANCE.objc_msgSend(klass, systemStatusBar));
+    public static NSStatusBar systemStatusBar() {
+        return new NSStatusBar(Runtime.INSTANCE.objc_msgSend(klass, systemStatusBar));
+    }
 
-        retain();
+    public NSStatusBar(long l) {
+        super(l);
     }
 
     public NSStatusBar(Pointer p) {
         super(Pointer.nativeValue(p));
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
     public NSStatusItem statusItemWithLength(double i) {

@@ -8,29 +8,17 @@ import com.sun.jna.Pointer;
 public class NSStatusItem extends NSObject {
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSStatusItem");
-
     static Pointer setHighlightMode = Runtime.INSTANCE.sel_getUid("setHighlightMode:");
-
     static Pointer setImage = Runtime.INSTANCE.sel_getUid("setImage:");
-
     static Pointer setTitle = Runtime.INSTANCE.sel_getUid("setTitle:");
-
     static Pointer setMenu = Runtime.INSTANCE.sel_getUid("setMenu:");
 
     public NSStatusItem(long l) {
         super(l);
-
-        retain();
     }
 
     public NSStatusItem(Pointer p) {
         super(Pointer.nativeValue(p));
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
     public void setHighlightMode(boolean b) {

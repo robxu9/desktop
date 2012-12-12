@@ -29,9 +29,6 @@ public class OSXSysTray extends DesktopSysTray {
 
     NSStatusItem statusItem;
 
-    public final static int NSVariableStatusItemLength = -1;
-    public final static int NSSquareStatusItemLength = -2;
-
     @Override
     public void showContextMenu() {
     }
@@ -87,8 +84,8 @@ public class OSXSysTray extends DesktopSysTray {
 
     void updateMenus() {
         if (statusItem == null) {
-            NSStatusBar b = new NSStatusBar();
-            statusItem = b.statusItemWithLength(NSVariableStatusItemLength);
+            NSStatusBar b = NSStatusBar.systemStatusBar();
+            statusItem = b.statusItemWithLength(NSStatusBar.NSVariableStatusItemLength);
         }
 
         NSMenu m = new NSMenu();
@@ -227,7 +224,7 @@ public class OSXSysTray extends DesktopSysTray {
     @Override
     public void hide() {
         if (statusItem != null) {
-            NSStatusBar b = new NSStatusBar();
+            NSStatusBar b = NSStatusBar.systemStatusBar();
             b.removeStatusItem(statusItem);
             statusItem = null;
         }
