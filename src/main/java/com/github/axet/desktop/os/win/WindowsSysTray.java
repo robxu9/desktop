@@ -2,8 +2,10 @@ package com.github.axet.desktop.os.win;
 
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.ArrayList;
@@ -19,6 +21,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.DesktopSysTray;
+import com.github.axet.desktop.os.mac.cocoa.NSFont;
+import com.github.axet.desktop.os.mac.cocoa.NSImage;
 import com.github.axet.desktop.os.win.handle.ATOM;
 import com.github.axet.desktop.os.win.handle.ICONINFO;
 import com.github.axet.desktop.os.win.handle.NOTIFYICONDATA;
@@ -77,6 +81,8 @@ public class WindowsSysTray extends DesktopSysTray {
     public static final int MF_POPUP = 0x00000010;
 
     public static final int TPM_RIGHTBUTTON = 0x0002;
+
+    public static final int SM_CYMENUCHECK = 72;
 
     public class MessagePump implements Runnable {
         Thread t;
@@ -291,6 +297,14 @@ public class WindowsSysTray extends DesktopSysTray {
         close();
     }
 
+    BufferedImage createBm(Icon icon) {
+        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = bi.createGraphics();
+        icon.paintIcon(null, g, 0, 0);
+        g.dispose();
+        return bi;
+    }
+
     HBITMAP createBitmap(Icon icon) {
         BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = bi.createGraphics();
@@ -349,6 +363,20 @@ public class WindowsSysTray extends DesktopSysTray {
         }
     }
 
+    HBITMAP getMenuImage(Icon icon) {
+        BufferedImage img = createBm(icon);
+
+        int menubarHeigh = User32.INSTANCE.GetSystemMetrics(SM_CYMENUCHECK);
+
+        BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics2D = scaledImage.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics2D.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
+        graphics2D.dispose();
+
+        return createBitmap(scaledImage);
+    }
+
     // http://www.pinvoke.net/default.aspx/user32.createiconindirect
 
     HICON createIconIndirect(HBITMAP bm) {
@@ -402,7 +430,7 @@ public class WindowsSysTray extends DesktopSysTray {
 
                 HBITMAP bm = null;
                 if (sub.getIcon() != null)
-                    bm = createBitmap(sub.getIcon());
+                    bm = getMenuImage(sub.getIcon());
                 hmenusids.add(new MenuMap(sub, bm));
 
                 // you know, the usual windows tricks (transfer handle to
@@ -421,7 +449,7 @@ public class WindowsSysTray extends DesktopSysTray {
                 int nID = hmenusids.size();
                 HBITMAP bm = null;
                 if (ch.getIcon() != null)
-                    bm = createBitmap(ch.getIcon());
+                    bm = getMenuImage(ch.getIcon());
                 hmenusids.add(new MenuMap(ch, bm));
 
                 if (!User32Ex.INSTANCE.AppendMenu(hmenu, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
@@ -434,7 +462,7 @@ public class WindowsSysTray extends DesktopSysTray {
                 int nID = hmenusids.size();
                 HBITMAP bm = null;
                 if (mi.getIcon() != null)
-                    bm = createBitmap(mi.getIcon());
+                    bm = getMenuImage(mi.getIcon());
                 hmenusids.add(new MenuMap(mi, bm));
 
                 if (!User32Ex.INSTANCE.AppendMenu(hmenu, (mi.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID,
@@ -467,7 +495,7 @@ public class WindowsSysTray extends DesktopSysTray {
 
                 HBITMAP bm = null;
                 if (sub.getIcon() != null)
-                    bm = createBitmap(sub.getIcon());
+                    bm = getMenuImage(sub.getIcon());
                 hmenusids.add(new MenuMap(sub, bm));
 
                 if (!User32Ex.INSTANCE.AppendMenu(hsub, MF_POPUP, handle, sub.getText()))
@@ -482,7 +510,7 @@ public class WindowsSysTray extends DesktopSysTray {
                 int nID = hmenusids.size();
                 HBITMAP bm = null;
                 if (ch.getIcon() != null)
-                    bm = createBitmap(ch.getIcon());
+                    bm = getMenuImage(ch.getIcon());
                 hmenusids.add(new MenuMap(ch, bm));
 
                 if (!User32Ex.INSTANCE.AppendMenu(hsub, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
@@ -495,7 +523,7 @@ public class WindowsSysTray extends DesktopSysTray {
                 int nID = hmenusids.size();
                 HBITMAP bm = null;
                 if (mi.getIcon() != null)
-                    bm = createBitmap(mi.getIcon());
+                    bm = getMenuImage(mi.getIcon());
                 hmenusids.add(new MenuMap(mi, bm));
 
                 if (!User32Ex.INSTANCE.AppendMenu(hsub, (mi.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID,
