@@ -84,7 +84,7 @@ library very helpful.
 		<dependency>
 		  <groupId>com.github.axet</groupId>
 		  <artifactId>desktop</artifactId>
-		  <version>0.0.5</version>
+		  <version>2.0.0</version>
 		</dependency>
 	</dependencies>
 		
