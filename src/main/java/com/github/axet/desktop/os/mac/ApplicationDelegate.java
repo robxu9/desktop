@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import com.github.axet.desktop.os.mac.cocoa.NSApplication;
 import com.github.axet.desktop.os.mac.cocoa.NSApplicationDelegate;
-import com.github.axet.desktop.os.mac.cocoa.NSObject;
 import com.github.axet.desktop.os.mac.foundation.Runtime;
 import com.sun.jna.Pointer;
 import com.sun.jna.win32.StdCallLibrary.StdCallCallback;

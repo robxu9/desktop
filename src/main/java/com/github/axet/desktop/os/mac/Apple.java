@@ -1,7 +1,6 @@
 package com.github.axet.desktop.os.mac;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 

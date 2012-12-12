@@ -2,7 +2,6 @@ package com.github.axet.desktop.os.mac.cocoa;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
