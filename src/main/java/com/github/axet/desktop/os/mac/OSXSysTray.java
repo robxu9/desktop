@@ -1,24 +1,16 @@
 package com.github.axet.desktop.os.mac;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 
-import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.github.axet.desktop.DesktopSysTray;
 import com.github.axet.desktop.os.mac.cocoa.NSFont;
@@ -130,14 +122,14 @@ public class OSXSysTray extends DesktopSysTray {
                 if (ch.getIcon() != null)
                     bm = getMenuImage(ch.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(ch);
+                OSXSysTrayAction action = new OSXSysTrayAction(ch);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
-                item.setAction(NSMenuItemAction.action);
+                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
@@ -147,13 +139,13 @@ public class OSXSysTray extends DesktopSysTray {
                 if (mi.getIcon() != null)
                     bm = getMenuImage(mi.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(mi);
+                OSXSysTrayAction action = new OSXSysTrayAction(mi);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
-                item.setAction(NSMenuItemAction.action);
+                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
                 m.addItem(item);
             }
@@ -190,14 +182,14 @@ public class OSXSysTray extends DesktopSysTray {
                 if (ch.getIcon() != null)
                     bm = getMenuImage(ch.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(ch);
+                OSXSysTrayAction action = new OSXSysTrayAction(ch);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
-                item.setAction(NSMenuItemAction.action);
+                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
@@ -207,13 +199,13 @@ public class OSXSysTray extends DesktopSysTray {
                 if (mi.getIcon() != null)
                     bm = getMenuImage(mi.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(mi);
+                OSXSysTrayAction action = new OSXSysTrayAction(mi);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
-                item.setAction(NSMenuItemAction.action);
+                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
                 m.addItem(item);
 

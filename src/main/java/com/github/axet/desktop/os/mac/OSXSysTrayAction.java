@@ -11,40 +11,41 @@ import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
 
 // https://developer.apple.com/library/mac/#documentation/Cocoa/Reference/ApplicationKit/Classes/NSImage_Class
 
-public class NSMenuItemAction extends NSObject {
+public class OSXSysTrayAction extends NSObject {
 
     public interface Action extends StdCallCallback {
         public void callback(Pointer self, Pointer selector);
     }
 
     static {
-        final Pointer klass = Runtime.INSTANCE.objc_allocateClassPair(NSObject.klass, "NSMenuItemAction", 0);
-        final Pointer action = Runtime.INSTANCE.sel_registerName("action:");
+        final Pointer klass = Runtime.INSTANCE.objc_allocateClassPair(NSObject.klass,
+                OSXSysTrayAction.class.getSimpleName(), 0);
+        final Pointer action = Runtime.INSTANCE.sel_registerName("action");
 
         boolean add = Runtime.INSTANCE.class_addMethod(klass, action, new Action() {
             public void callback(Pointer self, Pointer selector) {
                 if (selector.equals(action)) {
-                    NSMenuItemAction a = map.get(Pointer.nativeValue(self));
+                    OSXSysTrayAction a = map.get(Pointer.nativeValue(self));
                     a.mi.doClick();
                 }
             }
-        }, "@");
-        
-        if(!add)
+        }, "");
+
+        if (!add)
             throw new RuntimeException("problem initalizing class");
 
         Runtime.INSTANCE.objc_registerClassPair(klass);
     }
 
-    static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSMenuItemAction");
+    static Pointer klass = Runtime.INSTANCE.objc_lookUpClass(OSXSysTrayAction.class.getSimpleName());
 
-    static Pointer action = Runtime.INSTANCE.sel_getUid("action:");
+    static Pointer action = Runtime.INSTANCE.sel_getUid("action");
 
-    static HashMap<Long, NSMenuItemAction> map = new HashMap<Long, NSMenuItemAction>();
+    static HashMap<Long, OSXSysTrayAction> map = new HashMap<Long, OSXSysTrayAction>();
 
     JMenuItem mi;
 
-    public NSMenuItemAction(JMenuItem mi) {
+    public OSXSysTrayAction(JMenuItem mi) {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
 
         retain();
