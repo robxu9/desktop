@@ -165,7 +165,6 @@ public class SysTrayTest extends JFrame {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 System.out.println("test5");
-                sys.update();
             }
         });
         menu.add(menuItem5);
@@ -179,9 +178,9 @@ public class SysTrayTest extends JFrame {
         this.setSize(new Dimension(400, 400));
         GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
-        gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+        gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
         gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-        gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
         getContentPane().setLayout(gridBagLayout);
 
         JLabel lblNewLabel = new JLabel("Warn Label");
@@ -200,7 +199,7 @@ public class SysTrayTest extends JFrame {
         gbc_lblNewLabel_1.gridy = 0;
         getContentPane().add(lblNewLabel_1, gbc_lblNewLabel_1);
 
-        JButton btnNewButton = new JButton("Warn");
+        JButton btnNewButton = new JButton("Icon Bug");
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 sys.setIcon(warn);
@@ -213,7 +212,7 @@ public class SysTrayTest extends JFrame {
         gbc_btnNewButton.gridy = 1;
         getContentPane().add(btnNewButton, gbc_btnNewButton);
 
-        JButton btnNewButton_1 = new JButton("Stop");
+        JButton btnNewButton_1 = new JButton("Icon Bird");
         btnNewButton_1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 sys.setIcon(stop);
@@ -244,12 +243,12 @@ public class SysTrayTest extends JFrame {
             }
         });
         GridBagConstraints gbc_btnCreate = new GridBagConstraints();
-        gbc_btnCreate.insets = new Insets(0, 0, 0, 5);
+        gbc_btnCreate.insets = new Insets(0, 0, 5, 5);
         gbc_btnCreate.gridx = 0;
         gbc_btnCreate.gridy = 3;
         getContentPane().add(btnCreate, gbc_btnCreate);
         GridBagConstraints gbc_btnClose = new GridBagConstraints();
-        gbc_btnClose.insets = new Insets(0, 0, 0, 5);
+        gbc_btnClose.insets = new Insets(0, 0, 5, 5);
         gbc_btnClose.gridx = 1;
         gbc_btnClose.gridy = 3;
         getContentPane().add(btnClose, gbc_btnClose);
@@ -264,9 +263,34 @@ public class SysTrayTest extends JFrame {
             }
         });
         GridBagConstraints gbc_btnShowJmenu = new GridBagConstraints();
+        gbc_btnShowJmenu.insets = new Insets(0, 0, 5, 0);
         gbc_btnShowJmenu.gridx = 3;
         gbc_btnShowJmenu.gridy = 3;
         getContentPane().add(btnShowJmenu, gbc_btnShowJmenu);
+
+        JButton btnShow = new JButton("Show()");
+        btnShow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                sys.show();
+            }
+        });
+        GridBagConstraints gbc_btnShow = new GridBagConstraints();
+        gbc_btnShow.insets = new Insets(0, 0, 0, 5);
+        gbc_btnShow.gridx = 0;
+        gbc_btnShow.gridy = 4;
+        getContentPane().add(btnShow, gbc_btnShow);
+
+        JButton btnHide = new JButton("Hide()");
+        btnHide.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                sys.hide();
+            }
+        });
+        GridBagConstraints gbc_btnHide = new GridBagConstraints();
+        gbc_btnHide.insets = new Insets(0, 0, 0, 5);
+        gbc_btnHide.gridx = 1;
+        gbc_btnHide.gridy = 4;
+        getContentPane().add(btnHide, gbc_btnHide);
         this.setVisible(true);
 
     }
