@@ -455,7 +455,11 @@ public class WindowsSysTray extends DesktopSysTray {
                 if (!User32Ex.INSTANCE.AppendMenu(hmenu, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
                         | (ch.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID, ch.getText()))
                     throw new GetLastErrorException();
-
+                // it will replace checkbox with an image
+                //
+                // if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hmenu, nID, 0, bm,
+                // bm))
+                // throw new GetLastErrorException();
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
 
@@ -516,7 +520,11 @@ public class WindowsSysTray extends DesktopSysTray {
                 if (!User32Ex.INSTANCE.AppendMenu(hsub, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
                         | (ch.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID, ch.getText()))
                     throw new GetLastErrorException();
-
+                // it will replace checkbox with an image
+                //
+                // if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hsub, nID, 0, bm,
+                // bm))
+                // throw new GetLastErrorException();
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
 
