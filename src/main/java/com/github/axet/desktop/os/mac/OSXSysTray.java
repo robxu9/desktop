@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
@@ -26,6 +27,7 @@ public class OSXSysTray extends DesktopSysTray {
     BufferedImage icon;
 
     JPopupMenu menu;
+   //ArrayList<OSXSysTrayAction> menuActions = new ArrayList<OSXSysTrayAction>();
 
     NSStatusItem statusItem;
 
@@ -88,13 +90,9 @@ public class OSXSysTray extends DesktopSysTray {
             statusItem = b.statusItemWithLength(NSStatusBar.NSVariableStatusItemLength);
         }
 
-        NSMenu m = new NSMenu();
-        m.setAutoenablesItems(false);
-        NSImage n = new NSImage(icon);
+        //menuActions.clear();
 
-        statusItem.setImage(n);
-        statusItem.setHighlightMode(true);
-        statusItem.setMenu(m);
+        NSMenu m = new NSMenu();
 
         for (int i = 0; i < menu.getComponentCount(); i++) {
             Component e = menu.getComponent(i);
@@ -120,14 +118,15 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(ch.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(ch);
+               // menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
-                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
@@ -137,13 +136,14 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(mi.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(mi);
+                //menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
-                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
             }
 
@@ -151,6 +151,12 @@ public class OSXSysTray extends DesktopSysTray {
                 m.addItem(NSMenuItem.separatorItem());
             }
         }
+
+        m.setAutoenablesItems(false);
+        NSImage n = new NSImage(icon);
+        statusItem.setImage(n);
+        statusItem.setHighlightMode(true);
+        statusItem.setMenu(m);
     }
 
     NSMenu createSubmenu(JMenu menu) {
@@ -180,14 +186,15 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(ch.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(ch);
+                //menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
-                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
@@ -197,13 +204,14 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(mi.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(mi);
+                //menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
-                item.setAction(OSXSysTrayAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
 
             }
@@ -227,6 +235,7 @@ public class OSXSysTray extends DesktopSysTray {
             NSStatusBar b = NSStatusBar.systemStatusBar();
             b.removeStatusItem(statusItem);
             statusItem = null;
+            //menuActions.clear();
         }
     }
 

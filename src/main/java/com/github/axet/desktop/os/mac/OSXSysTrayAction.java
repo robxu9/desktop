@@ -13,43 +13,41 @@ import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
 
 public class OSXSysTrayAction extends NSObject {
 
+    static HashMap<Long, OSXSysTrayAction> map = new HashMap<Long, OSXSysTrayAction>();
+
+    final static Pointer registerKlass = Runtime.INSTANCE.objc_allocateClassPair(NSObject.klass,
+            OSXSysTrayAction.class.getSimpleName(), 0);
+
+    final static Pointer registerActionSelector = Runtime.INSTANCE.sel_registerName("action");
+
+    final static Action registerAction = new Action() {
+        public void callback(Pointer self, Pointer selector) {
+            if (selector.equals(registerActionSelector)) {
+                OSXSysTrayAction a = map.get(Pointer.nativeValue(self));
+                a.mi.doClick();
+            }
+        }
+    };
+
     public interface Action extends StdCallCallback {
         public void callback(Pointer self, Pointer selector);
     }
 
     static {
-        final Pointer klass = Runtime.INSTANCE.objc_allocateClassPair(NSObject.klass,
-                OSXSysTrayAction.class.getSimpleName(), 0);
-
-        final Pointer action = Runtime.INSTANCE.sel_registerName("action");
-
-        Action a = new Action() {
-            public void callback(Pointer self, Pointer selector) {
-                if (selector.equals(action)) {
-                    OSXSysTrayAction a = map.get(Pointer.nativeValue(self));
-                    a.mi.doClick();
-                }
-            }
-        };
-
-        if (!Runtime.INSTANCE.class_addMethod(klass, action, a, "v@:"))
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, registerActionSelector, registerAction, "v@:"))
             throw new RuntimeException("problem initalizing class");
 
-        Runtime.INSTANCE.objc_registerClassPair(klass);
+        Runtime.INSTANCE.objc_registerClassPair(registerKlass);
     }
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass(OSXSysTrayAction.class.getSimpleName());
 
     static Pointer action = Runtime.INSTANCE.sel_getUid("action");
 
-    static HashMap<Long, OSXSysTrayAction> map = new HashMap<Long, OSXSysTrayAction>();
-
     JMenuItem mi;
 
     public OSXSysTrayAction(JMenuItem mi) {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
-
-        retain();
 
         map.put(Pointer.nativeValue(this), this);
 
@@ -58,8 +56,6 @@ public class OSXSysTrayAction extends NSObject {
 
     protected void finalize() throws Throwable {
         map.remove(Pointer.nativeValue(this));
-
-        release();
     }
 
 }
