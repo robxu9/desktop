@@ -27,7 +27,7 @@ public class OSXSysTray extends DesktopSysTray {
     BufferedImage icon;
 
     JPopupMenu menu;
-   //ArrayList<OSXSysTrayAction> menuActions = new ArrayList<OSXSysTrayAction>();
+    ArrayList<OSXSysTrayAction> menuActions = new ArrayList<OSXSysTrayAction>();
 
     NSStatusItem statusItem;
 
@@ -90,7 +90,7 @@ public class OSXSysTray extends DesktopSysTray {
             statusItem = b.statusItemWithLength(NSStatusBar.NSVariableStatusItemLength);
         }
 
-        //menuActions.clear();
+         menuActions.clear();
 
         NSMenu m = new NSMenu();
 
@@ -118,7 +118,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(ch.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(ch);
-               // menuActions.add(action);
+               menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
@@ -136,7 +136,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(mi.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(mi);
-                //menuActions.add(action);
+                menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
@@ -186,7 +186,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(ch.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(ch);
-                //menuActions.add(action);
+                menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
@@ -204,7 +204,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(mi.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(mi);
-                //menuActions.add(action);
+                menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
@@ -235,7 +235,7 @@ public class OSXSysTray extends DesktopSysTray {
             NSStatusBar b = NSStatusBar.systemStatusBar();
             b.removeStatusItem(statusItem);
             statusItem = null;
-            //menuActions.clear();
+             menuActions.clear();
         }
     }
 

@@ -7,7 +7,7 @@ import com.sun.jna.Pointer;
 
 public class NSApplicationDelegate extends NSObject {
 
-    static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSData");
+    public static Pointer klass = Runtime.INSTANCE.objc_getProtocol("NSApplicationDelegate");
 
     public NSApplicationDelegate(long l) {
         super(l);

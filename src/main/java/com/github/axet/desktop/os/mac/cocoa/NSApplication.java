@@ -23,8 +23,12 @@ public class NSApplication extends NSObject {
     static Pointer delegate = Runtime.INSTANCE.sel_getUid("delegate");
     static Pointer setDelegate = Runtime.INSTANCE.sel_getUid("setDelegate:");
 
-    public NSApplication() {
-        super(Runtime.INSTANCE.objc_msgSend(klass, sharedApplication));
+    public static NSApplication sharedApplication() {
+        return new NSApplication(Runtime.INSTANCE.objc_msgSend(klass, sharedApplication));
+    }
+
+    public NSApplication(long l) {
+        super(l);
     }
 
     public NSApplication(Pointer p) {
