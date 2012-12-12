@@ -1,6 +1,5 @@
 package com.github.axet.desktop.os.win.handle;
 
-import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.WString;
 import com.sun.jna.platform.win32.WinDef.HCURSOR;

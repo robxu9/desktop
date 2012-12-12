@@ -10,9 +10,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
@@ -21,8 +19,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.DesktopSysTray;
-import com.github.axet.desktop.os.mac.cocoa.NSFont;
-import com.github.axet.desktop.os.mac.cocoa.NSImage;
 import com.github.axet.desktop.os.win.handle.ATOM;
 import com.github.axet.desktop.os.win.handle.ICONINFO;
 import com.github.axet.desktop.os.win.handle.NOTIFYICONDATA;
@@ -298,7 +294,7 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     BufferedImage createBm(Icon icon) {
-        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics g = bi.createGraphics();
         icon.paintIcon(null, g, 0, 0);
         g.dispose();
@@ -306,7 +302,7 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     HBITMAP createBitmap(Icon icon) {
-        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics g = bi.createGraphics();
         icon.paintIcon(null, g, 0, 0);
         g.dispose();

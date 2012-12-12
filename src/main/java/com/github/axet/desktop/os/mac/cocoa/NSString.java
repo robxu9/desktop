@@ -1,8 +1,7 @@
 package com.github.axet.desktop.os.mac.cocoa;
 
-import com.sun.jna.Pointer;
-
 import com.github.axet.desktop.os.mac.foundation.Runtime;
+import com.sun.jna.Pointer;
 
 // thanks so https://gist.github.com/3974488
 

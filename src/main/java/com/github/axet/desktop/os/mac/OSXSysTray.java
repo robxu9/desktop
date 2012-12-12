@@ -1,7 +1,7 @@
 package com.github.axet.desktop.os.mac;
 
+import java.awt.AlphaComposite;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -27,7 +27,7 @@ public class OSXSysTray extends DesktopSysTray {
     BufferedImage icon;
 
     JPopupMenu menu;
-   //ArrayList<OSXSysTrayAction> menuActions = new ArrayList<OSXSysTrayAction>();
+    ArrayList<OSXSysTrayAction> menuActions = new ArrayList<OSXSysTrayAction>();
 
     NSStatusItem statusItem;
 
@@ -36,8 +36,9 @@ public class OSXSysTray extends DesktopSysTray {
     }
 
     static BufferedImage createBitmap(Icon icon) {
-        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics g = bi.createGraphics();
+        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = bi.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
         icon.paintIcon(null, g, 0, 0);
         g.dispose();
         return bi;
@@ -52,7 +53,7 @@ public class OSXSysTray extends DesktopSysTray {
 
         BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = scaledImage.createGraphics();
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
         graphics2D.drawImage(this.icon, 0, 0, menubarHeigh, menubarHeigh, null);
         graphics2D.dispose();
 
@@ -67,6 +68,9 @@ public class OSXSysTray extends DesktopSysTray {
 
         BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = scaledImage.createGraphics();
+        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
+        graphics2D.fillRect(0, 0, menubarHeigh, menubarHeigh);
+        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
         graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics2D.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
         graphics2D.dispose();
@@ -90,7 +94,7 @@ public class OSXSysTray extends DesktopSysTray {
             statusItem = b.statusItemWithLength(NSStatusBar.NSVariableStatusItemLength);
         }
 
-        //menuActions.clear();
+        menuActions.clear();
 
         NSMenu m = new NSMenu();
 
@@ -118,7 +122,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(ch.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(ch);
-               // menuActions.add(action);
+                menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
@@ -136,7 +140,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(mi.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(mi);
-                //menuActions.add(action);
+                menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
@@ -186,7 +190,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(ch.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(ch);
-                //menuActions.add(action);
+                menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
@@ -204,7 +208,7 @@ public class OSXSysTray extends DesktopSysTray {
                     bm = getMenuImage(mi.getIcon());
 
                 OSXSysTrayAction action = new OSXSysTrayAction(mi);
-                //menuActions.add(action);
+                menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
@@ -235,7 +239,7 @@ public class OSXSysTray extends DesktopSysTray {
             NSStatusBar b = NSStatusBar.systemStatusBar();
             b.removeStatusItem(statusItem);
             statusItem = null;
-            //menuActions.clear();
+            menuActions.clear();
         }
     }
 

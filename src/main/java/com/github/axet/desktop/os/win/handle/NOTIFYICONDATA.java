@@ -1,8 +1,5 @@
 package com.github.axet.desktop.os.win.handle;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.github.axet.desktop.os.win.GUID;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.WinDef.HICON;

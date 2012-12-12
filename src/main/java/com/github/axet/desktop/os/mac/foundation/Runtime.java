@@ -26,10 +26,16 @@ public interface Runtime extends Library {
     long class_createInstance(Pointer cls, int extraBytes);
 
     boolean class_addMethod(Pointer cls, Pointer selector, StdCallCallback imp, String types);
-    
+
     Pointer sel_registerName(String name);
-    
+
     Pointer objc_allocateClassPair(Pointer superClass, String name, long extraBytes);
 
     void objc_registerClassPair(Pointer cls);
+
+    Pointer class_getInstanceMethod(Pointer cls, Pointer selecter);
+
+    Pointer method_setImplementation(Pointer method, StdCallCallback imp);
+
+    Pointer objc_getProtocol(String protocol);
 }

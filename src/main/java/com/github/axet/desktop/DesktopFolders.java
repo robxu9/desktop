@@ -2,10 +2,6 @@ package com.github.axet.desktop;
 
 import java.io.File;
 
-import com.github.axet.desktop.os.Linux;
-import com.github.axet.desktop.os.mac.OSX;
-import com.github.axet.desktop.os.win.Windows;
-
 public interface DesktopFolders {
 
     // user application data folder
