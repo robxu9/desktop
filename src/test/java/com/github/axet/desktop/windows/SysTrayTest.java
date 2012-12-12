@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 
 import net.sf.image4j.codec.ico.ICODecoder;
 
@@ -165,6 +166,7 @@ public class SysTrayTest extends JFrame {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 System.out.println("test5");
+                sys.update();
             }
         });
         menu.add(menuItem5);
@@ -352,6 +354,12 @@ public class SysTrayTest extends JFrame {
     }
 
     public static void main(String[] args) {
-        new SysTrayTest();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                new SysTrayTest();
+            }
+        });
     }
 }

@@ -1,24 +1,17 @@
 package com.github.axet.desktop.os.mac;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
-import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.github.axet.desktop.DesktopSysTray;
 import com.github.axet.desktop.os.mac.cocoa.NSFont;
@@ -34,11 +27,9 @@ public class OSXSysTray extends DesktopSysTray {
     BufferedImage icon;
 
     JPopupMenu menu;
+   //ArrayList<OSXSysTrayAction> menuActions = new ArrayList<OSXSysTrayAction>();
 
     NSStatusItem statusItem;
-
-    public final static int NSVariableStatusItemLength = -1;
-    public final static int NSSquareStatusItemLength = -2;
 
     @Override
     public void showContextMenu() {
@@ -95,17 +86,13 @@ public class OSXSysTray extends DesktopSysTray {
 
     void updateMenus() {
         if (statusItem == null) {
-            NSStatusBar b = new NSStatusBar();
-            statusItem = b.statusItemWithLength(NSVariableStatusItemLength);
+            NSStatusBar b = NSStatusBar.systemStatusBar();
+            statusItem = b.statusItemWithLength(NSStatusBar.NSVariableStatusItemLength);
         }
 
-        NSMenu m = new NSMenu();
-        m.setAutoenablesItems(false);
-        NSImage n = new NSImage(icon);
+        //menuActions.clear();
 
-        statusItem.setImage(n);
-        statusItem.setHighlightMode(true);
-        statusItem.setMenu(m);
+        NSMenu m = new NSMenu();
 
         for (int i = 0; i < menu.getComponentCount(); i++) {
             Component e = menu.getComponent(i);
@@ -130,15 +117,16 @@ public class OSXSysTray extends DesktopSysTray {
                 if (ch.getIcon() != null)
                     bm = getMenuImage(ch.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(ch);
+                OSXSysTrayAction action = new OSXSysTrayAction(ch);
+               // menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
-                item.setAction(NSMenuItemAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
@@ -147,14 +135,15 @@ public class OSXSysTray extends DesktopSysTray {
                 if (mi.getIcon() != null)
                     bm = getMenuImage(mi.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(mi);
+                OSXSysTrayAction action = new OSXSysTrayAction(mi);
+                //menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
-                item.setAction(NSMenuItemAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
             }
 
@@ -162,6 +151,12 @@ public class OSXSysTray extends DesktopSysTray {
                 m.addItem(NSMenuItem.separatorItem());
             }
         }
+
+        m.setAutoenablesItems(false);
+        NSImage n = new NSImage(icon);
+        statusItem.setImage(n);
+        statusItem.setHighlightMode(true);
+        statusItem.setMenu(m);
     }
 
     NSMenu createSubmenu(JMenu menu) {
@@ -190,15 +185,16 @@ public class OSXSysTray extends DesktopSysTray {
                 if (ch.getIcon() != null)
                     bm = getMenuImage(ch.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(ch);
+                OSXSysTrayAction action = new OSXSysTrayAction(ch);
+                //menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
-                item.setAction(NSMenuItemAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
@@ -207,14 +203,15 @@ public class OSXSysTray extends DesktopSysTray {
                 if (mi.getIcon() != null)
                     bm = getMenuImage(mi.getIcon());
 
-                NSMenuItemAction action = new NSMenuItemAction(mi);
+                OSXSysTrayAction action = new OSXSysTrayAction(mi);
+                //menuActions.add(action);
 
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
-                item.setAction(NSMenuItemAction.action);
                 item.setTarget(action);
+                item.setAction(OSXSysTrayAction.action);
                 m.addItem(item);
 
             }
@@ -235,9 +232,10 @@ public class OSXSysTray extends DesktopSysTray {
     @Override
     public void hide() {
         if (statusItem != null) {
-            NSStatusBar b = new NSStatusBar();
+            NSStatusBar b = NSStatusBar.systemStatusBar();
             b.removeStatusItem(statusItem);
             statusItem = null;
+            //menuActions.clear();
         }
     }
 

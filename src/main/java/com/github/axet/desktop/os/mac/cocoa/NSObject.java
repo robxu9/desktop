@@ -8,22 +8,30 @@ import com.sun.jna.Pointer;
 public class NSObject extends Pointer {
 
     public static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSObject");
-
     static Pointer alloc = Runtime.INSTANCE.sel_getUid("alloc");
-
     static Pointer retain = Runtime.INSTANCE.sel_getUid("retain");
     static Pointer release = Runtime.INSTANCE.sel_getUid("release");
 
     public NSObject() {
         super(Runtime.INSTANCE.objc_msgSend(klass, alloc));
+
+        retain();
     }
 
     public NSObject(Pointer p) {
         super(Pointer.nativeValue(p));
+
+        retain();
     }
 
     public NSObject(long l) {
         super(l);
+
+        retain();
+    }
+
+    protected void finalize() throws Throwable {
+        release();
     }
 
     public void retain() {

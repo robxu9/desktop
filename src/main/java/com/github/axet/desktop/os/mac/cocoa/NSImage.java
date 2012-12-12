@@ -16,7 +16,6 @@ import com.sun.jna.Pointer;
 public class NSImage extends NSObject {
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSImage");
-
     static Pointer initWithData = Runtime.INSTANCE.sel_getUid("initWithData:");
 
     static BufferedImage createBitmap(Icon icon) {
@@ -49,8 +48,6 @@ public class NSImage extends NSObject {
 
         NSData data = create(img);
         Runtime.INSTANCE.objc_msgSend(this, initWithData, data);
-
-        retain();
     }
 
     public NSImage(BufferedImage img) {
@@ -58,26 +55,16 @@ public class NSImage extends NSObject {
 
         NSData data = create(img);
         Runtime.INSTANCE.objc_msgSend(this, initWithData, data);
-
-        retain();
     }
 
     public NSImage(NSData data) {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
 
         Runtime.INSTANCE.objc_msgSend(this, initWithData, data);
-
-        retain();
     }
 
     public NSImage(Pointer p) {
         super(Pointer.nativeValue(p));
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
 }

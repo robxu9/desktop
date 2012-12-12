@@ -11,18 +11,10 @@ public class NSApplicationDelegate extends NSObject {
 
     public NSApplicationDelegate(long l) {
         super(l);
-
-        retain();
     }
 
     public NSApplicationDelegate(Pointer p) {
         super(Pointer.nativeValue(p));
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
 }

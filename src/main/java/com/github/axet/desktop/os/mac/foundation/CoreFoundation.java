@@ -1,7 +1,5 @@
 package com.github.axet.desktop.os.mac.foundation;
 
-import com.github.axet.desktop.os.mac.cocoa.CFRange;
-import com.github.axet.desktop.os.mac.cocoa.NSArray;
 import com.github.axet.desktop.os.mac.cocoa.NSString;
 import com.sun.jna.Library;
 import com.sun.jna.Native;

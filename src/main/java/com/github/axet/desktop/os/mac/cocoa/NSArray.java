@@ -8,9 +8,7 @@ import com.sun.jna.Pointer;
 public class NSArray extends NSObject {
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSArray");
-
     static Pointer count = Runtime.INSTANCE.sel_getUid("count");
-
     static Pointer objectAtIndex = Runtime.INSTANCE.sel_getUid("objectAtIndex:");
 
     public NSArray(long l) {
@@ -19,12 +17,6 @@ public class NSArray extends NSObject {
 
     public NSArray(Pointer p) {
         super(Pointer.nativeValue(p));
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
     public long count() {

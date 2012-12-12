@@ -8,25 +8,15 @@ import com.sun.jna.Pointer;
 public class NSMenu extends NSObject {
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSMenu");
-
     static Pointer addItem = Runtime.INSTANCE.sel_getUid("addItem:");
-
     static Pointer setAutoenablesItems = Runtime.INSTANCE.sel_getUid("setAutoenablesItems:");
 
     public NSMenu() {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
-
-        retain();
     }
 
     public NSMenu(Pointer p) {
         super(Pointer.nativeValue(p));
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
     public void addItem(NSMenuItem i) {

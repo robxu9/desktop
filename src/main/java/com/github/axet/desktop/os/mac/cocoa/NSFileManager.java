@@ -48,19 +48,11 @@ public class NSFileManager extends NSObject {
     };
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSFileManager");
-
     static Pointer defaultManager = Runtime.INSTANCE.sel_getUid("defaultManager");
-
     static Pointer URLsForDirectoryInDomains = Runtime.INSTANCE.sel_getUid("URLsForDirectory:inDomains:");
 
     public NSFileManager() {
         super(Runtime.INSTANCE.objc_msgSend(klass, defaultManager));
-
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
     // http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Functions/Reference/reference.html#//apple_ref/c/func/NSSearchPathForDirectoriesInDomains

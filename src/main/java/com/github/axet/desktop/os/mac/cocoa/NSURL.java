@@ -8,19 +8,12 @@ import com.sun.jna.Pointer;
 public class NSURL extends NSObject {
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSURL");
-
     static Pointer absoluteString = Runtime.INSTANCE.sel_getUid("absoluteString");
-
     static Pointer path = Runtime.INSTANCE.sel_getUid("path");
 
     public NSURL(Pointer p) {
         super(Pointer.nativeValue(p));
 
-        retain();
-    }
-
-    protected void finalize() throws Throwable {
-        release();
     }
 
     public NSString absoluteString() {
