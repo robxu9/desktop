@@ -21,7 +21,7 @@ public class NSMenuItemAction extends NSObject {
         final Pointer klass = Runtime.INSTANCE.objc_allocateClassPair(NSObject.klass, "NSMenuItemAction", 0);
         final Pointer action = Runtime.INSTANCE.sel_registerName("action:");
 
-        Runtime.INSTANCE.class_addMethod(klass, action, new Action() {
+        boolean add = Runtime.INSTANCE.class_addMethod(klass, action, new Action() {
             public void callback(Pointer self, Pointer selector) {
                 if (selector.equals(action)) {
                     NSMenuItemAction a = map.get(Pointer.nativeValue(self));
@@ -29,6 +29,9 @@ public class NSMenuItemAction extends NSObject {
                 }
             }
         }, "@");
+        
+        if(!add)
+            throw new RuntimeException("problem initalizing class");
 
         Runtime.INSTANCE.objc_registerClassPair(klass);
     }

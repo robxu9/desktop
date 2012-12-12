@@ -20,7 +20,6 @@ import com.github.axet.desktop.os.mac.cocoa.NSMenuItem;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusBar;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusItem;
 import com.github.axet.desktop.os.mac.cocoa.NSString;
-import com.sun.jna.Pointer;
 
 public class OSXSysTray extends DesktopSysTray {
 
@@ -35,8 +34,6 @@ public class OSXSysTray extends DesktopSysTray {
 
     @Override
     public void showContextMenu() {
-        // TODO Auto-generated method stub
-
     }
 
     static BufferedImage createBitmap(Icon icon) {
