@@ -20,6 +20,7 @@ import com.github.axet.desktop.os.mac.cocoa.NSMenuItem;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusBar;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusItem;
 import com.github.axet.desktop.os.mac.cocoa.NSString;
+import com.sun.jna.Pointer;
 
 public class OSXSysTray extends DesktopSysTray {
 
@@ -94,6 +95,7 @@ public class OSXSysTray extends DesktopSysTray {
         }
 
         NSMenu m = new NSMenu();
+        m.setAutoenablesItems(false);
         NSImage n = new NSImage(icon);
 
         statusItem.setImage(n);
@@ -123,11 +125,15 @@ public class OSXSysTray extends DesktopSysTray {
                 if (ch.getIcon() != null)
                     bm = getMenuImage(ch.getIcon());
 
+                NSMenuItemAction action = new NSMenuItemAction(ch);
+
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
+                item.setAction(NSMenuItemAction.action);
+                item.setTarget(action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
@@ -136,10 +142,14 @@ public class OSXSysTray extends DesktopSysTray {
                 if (mi.getIcon() != null)
                     bm = getMenuImage(mi.getIcon());
 
+                NSMenuItemAction action = new NSMenuItemAction(mi);
+
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
+                item.setAction(NSMenuItemAction.action);
+                item.setTarget(action);
                 m.addItem(item);
             }
 
@@ -175,11 +185,15 @@ public class OSXSysTray extends DesktopSysTray {
                 if (ch.getIcon() != null)
                     bm = getMenuImage(ch.getIcon());
 
+                NSMenuItemAction action = new NSMenuItemAction(ch);
+
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(ch.getText()));
                 item.setImage(bm);
                 item.setEnabled(ch.isEnabled());
                 item.setState(ch.getState() ? 1 : 0);
+                item.setAction(NSMenuItemAction.action);
+                item.setTarget(action);
                 m.addItem(item);
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
@@ -188,10 +202,14 @@ public class OSXSysTray extends DesktopSysTray {
                 if (mi.getIcon() != null)
                     bm = getMenuImage(mi.getIcon());
 
+                NSMenuItemAction action = new NSMenuItemAction(mi);
+
                 NSMenuItem item = new NSMenuItem();
                 item.setTitle(new NSString(mi.getText()));
                 item.setImage(bm);
                 item.setEnabled(mi.isEnabled());
+                item.setAction(NSMenuItemAction.action);
+                item.setTarget(action);
                 m.addItem(item);
 
             }

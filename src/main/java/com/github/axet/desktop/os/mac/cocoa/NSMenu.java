@@ -11,23 +11,29 @@ public class NSMenu extends NSObject {
 
     static Pointer addItem = Runtime.INSTANCE.sel_getUid("addItem:");
 
+    static Pointer setAutoenablesItems = Runtime.INSTANCE.sel_getUid("setAutoenablesItems:");
+
     public NSMenu() {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
-        
+
         retain();
     }
 
     public NSMenu(Pointer p) {
         super(Pointer.nativeValue(p));
-        
+
         retain();
     }
-    
+
     protected void finalize() throws Throwable {
         release();
     }
 
     public void addItem(NSMenuItem i) {
         Runtime.INSTANCE.objc_msgSend(this, addItem, i);
+    }
+
+    public void setAutoenablesItems(boolean b) {
+        Runtime.INSTANCE.objc_msgSend(this, setAutoenablesItems, b);
     }
 }

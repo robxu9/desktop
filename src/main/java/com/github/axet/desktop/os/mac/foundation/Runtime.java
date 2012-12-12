@@ -3,6 +3,7 @@ package com.github.axet.desktop.os.mac.foundation;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
 
 // thanks to https://gist.github.com/3974488
 
@@ -23,4 +24,12 @@ public interface Runtime extends Library {
     long objc_msgSend(Pointer theReceiver, Pointer theSelector, Object... string);
 
     long class_createInstance(Pointer cls, int extraBytes);
+
+    boolean class_addMethod(Pointer cls, Pointer selector, StdCallCallback imp, String types);
+    
+    Pointer sel_registerName(String name);
+    
+    Pointer objc_allocateClassPair(Pointer superClass, String name, long extraBytes);
+
+    void objc_registerClassPair(Pointer cls);
 }

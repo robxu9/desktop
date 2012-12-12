@@ -7,7 +7,7 @@ import com.sun.jna.Pointer;
 
 public class NSObject extends Pointer {
 
-    static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSObject");
+    public static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSObject");
 
     static Pointer alloc = Runtime.INSTANCE.sel_getUid("alloc");
 

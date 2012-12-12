@@ -2,6 +2,7 @@ package com.github.axet.desktop.os.mac.cocoa;
 
 import com.github.axet.desktop.os.mac.foundation.Runtime;
 import com.sun.jna.Pointer;
+import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
 
 // https://developer.apple.com/library/mac/#documentation/Cocoa/Reference/ApplicationKit/Classes/NSImage_Class
 
@@ -20,6 +21,10 @@ public class NSMenuItem extends NSObject {
     static Pointer setSubmenu = Runtime.INSTANCE.sel_getUid("setSubmenu:");
 
     static Pointer setState = Runtime.INSTANCE.sel_getUid("setState:");
+
+    static Pointer setTarget = Runtime.INSTANCE.sel_getUid("setTarget:");
+
+    static Pointer setAction = Runtime.INSTANCE.sel_getUid("setAction:");
 
     public NSMenuItem() {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
@@ -65,5 +70,13 @@ public class NSMenuItem extends NSObject {
 
     public void setState(int i) {
         Runtime.INSTANCE.objc_msgSend(this, setState, i);
+    }
+
+    public void setTarget(NSObject o) {
+        Runtime.INSTANCE.objc_msgSend(this, setTarget, o);
+    }
+
+    public void setAction(Pointer p) {
+        Runtime.INSTANCE.objc_msgSend(this, setAction, p);
     }
 }
