@@ -1,23 +1,20 @@
 package com.github.axet.desktop.os.mac;
 
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.DesktopSysTray;
-import com.github.axet.desktop.os.mac.cocoa.NSData;
+import com.github.axet.desktop.os.mac.cocoa.NSApplication;
+import com.github.axet.desktop.os.mac.cocoa.NSDocTile;
 import com.github.axet.desktop.os.mac.cocoa.NSImage;
 import com.github.axet.desktop.os.mac.cocoa.NSMenu;
 import com.github.axet.desktop.os.mac.cocoa.NSMenuItem;
+import com.github.axet.desktop.os.mac.cocoa.NSRect;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusBar;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusItem;
 import com.github.axet.desktop.os.mac.cocoa.NSString;
+import com.github.axet.desktop.os.mac.cocoa.NSWindow;
 
 public class OSXSysTray extends DesktopSysTray {
 
@@ -43,45 +40,45 @@ public class OSXSysTray extends DesktopSysTray {
 
     }
 
-    BufferedImage createBitmap(Icon icon) {
-        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics g = bi.createGraphics();
-        icon.paintIcon(null, g, 0, 0);
-        g.dispose();
-        return bi;
-    }
-
     void assertEquals(Object o, Object b) {
 
     }
 
     @Override
     public void show() {
-//        try {
-//            BufferedImage bi = createBitmap(icon);
-//            ByteArrayOutputStream bufio = new ByteArrayOutputStream();
-//            ImageIO.write(bi, "JPG", bufio);
-//            byte[] buf = bufio.toByteArray();
-//            NSData data = new NSData(buf);
-//            NSImage n = new NSImage(data);
+        NSMenu m = new NSMenu();
 
-            NSMenu m = new NSMenu();
+        NSImage n = new NSImage(icon);
 
-            NSMenuItem item = new NSMenuItem();
-            item.setTitle(new NSString("Test"));
-            m.addItem(item);
+        NSApplication a = new NSApplication();
 
-            NSStatusBar b = new NSStatusBar();
-            NSStatusItem i = b.statusItemWithLength(NSVariableStatusItemLength);
-            i.setTitle(new NSString("absdgasfds afdsaf ad"));
-//            i.setImage(n);
-            i.setHighlightMode(true);
-            i.setMenu(m);
-            
-            JOptionPane.showMessageDialog(null, "done");
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        NSDocTile nd = a.dockTile();
+        nd.setBadgeLabel(new NSString("test"));
+
+        boolean bb = a.isRunning();
+        bb = a.isActive();
+        long aa = a.requestUserAttention(NSApplication.NSCriticalRequest);
+        a.setApplicationIconImage(n);
+        a.cancelUserAttentionRequest(aa);
+
+        NSRect rect = new NSRect(0, 0, 200, 200);
+        NSWindow w = NSWindow.initWithContentRectStyleMaskBackingDefer(new NSRect.ByValue(rect),
+                NSWindow.NSBorderlessWindowMask, NSWindow.NSBackingStoreBuffered, false);
+        w.makeKeyAndOrderFront(a);
+
+        NSMenuItem item = new NSMenuItem();
+        item.setTitle(new NSString("Test"));
+        m.addItem(item);
+
+        NSStatusBar b = new NSStatusBar();
+        NSStatusItem i = b.statusItemWithLength(NSVariableStatusItemLength);
+        i.setTitle(new NSString("test"));
+        // i.setImage(n);
+        i.setHighlightMode(true);
+        i.setMenu(m);
+
+        JOptionPane.showMessageDialog(null, "asdfsdf");
+
     }
 
     @Override

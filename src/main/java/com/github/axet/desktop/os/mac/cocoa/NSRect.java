@@ -5,42 +5,49 @@ import java.util.List;
 
 import com.sun.jna.Structure;
 
-public class CFRange extends Structure {
+public class NSRect extends Structure {
 
-    public static class ByReference extends CFRange implements com.sun.jna.Structure.ByReference {
+    public static class ByReference extends NSRect implements com.sun.jna.Structure.ByReference {
         // / Allocate a new Pair.ByRef struct on the heap
         public ByReference() {
         }
 
         // / Create an instance that shares its memory with another Pair
         // instance
-        public ByReference(CFRange struct) {
+        public ByReference(NSRect struct) {
             super(struct.getPointer(), 0);
         }
     }
 
-    public static class ByValue extends CFRange implements Structure.ByValue {
+    public static class ByValue extends NSRect implements Structure.ByValue {
         public ByValue() {
         }
 
         // / Create an instance that shares its memory with another Pair
         // instance
-        public ByValue(CFRange struct) {
+        public ByValue(NSRect struct) {
             super(struct.getPointer(), 0);
         }
     }
 
-    public CFRange() {
+    public NSRect() {
+    }
+
+    public NSRect(int x, int y, int cx, int cy) {
+        origin.x = x;
+        origin.y = y;
+        size.width = cx;
+        size.height = cy;
     }
 
     // Cast data at given memory location (pointer + offset) as an existing
     // Pair struct
-    public CFRange(com.sun.jna.Pointer pointer, int offset) {
+    public NSRect(com.sun.jna.Pointer pointer, int offset) {
         super();
         useMemory(pointer, offset);
         read();
     }
 
-    public long loc;
-    public long len;
+    public NSPoint origin;
+    public NSSize size;
 }

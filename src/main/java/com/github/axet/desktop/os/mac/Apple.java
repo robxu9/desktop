@@ -123,11 +123,6 @@ public class Apple {
         }
     }
 
-    public void setDockIconBadge(String s) {
-        com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
-        a.setDockIconBadge(s);
-    }
-
     public void appReOpenedListener(final AppReOpenedListener r) {
         com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
         a.addAppEventListener(new com.apple.eawt.AppReOpenedListener() {

@@ -7,7 +7,7 @@
     import javax.swing.JMenuItem;
     import javax.swing.JPopupMenu;
     
-    public class SysTrayTest extends JFrame {
+    public class SimpleTrayTest extends JFrame {
     
         DesktopSysTray sys = Desktop.getDesktopSysTray();
         JPopupMenu menu;
@@ -31,7 +31,7 @@
     
         };
     
-        public SysTrayTest() {
+        public SimpleTrayTest() {
             super("MainFrame");
     
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,6 +53,6 @@
         }
     
         public static void main(String[] args) {
-            new SysTrayTest();
+            new SimpleTrayTest();
         }
     }
