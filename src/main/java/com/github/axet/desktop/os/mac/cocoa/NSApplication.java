@@ -25,6 +25,12 @@ public class NSApplication extends NSObject {
 
     static Pointer dockTile = Runtime.INSTANCE.sel_getUid("dockTile");
 
+    static Pointer runModalForWindow = Runtime.INSTANCE.sel_getUid("runModalForWindow:");
+
+    static Pointer delegate = Runtime.INSTANCE.sel_getUid("delegate");
+
+    static Pointer setDelegate = Runtime.INSTANCE.sel_getUid("setDelegate:");
+
     public final static int NSCriticalRequest = 0;
     public final static int NSInformationalRequest = 10;
 
@@ -70,5 +76,17 @@ public class NSApplication extends NSObject {
 
     public void cancelUserAttentionRequest(long code) {
         Runtime.INSTANCE.objc_msgSend(this, cancelUserAttentionRequest, code);
+    }
+
+    public long runModalForWindow(NSWindow w) {
+        return Runtime.INSTANCE.objc_msgSend(this, cancelUserAttentionRequest, w);
+    }
+
+    public NSApplicationDelegate delegate() {
+        return new NSApplicationDelegate(Runtime.INSTANCE.objc_msgSend(this, delegate));
+    }
+
+    public void setDelegate(NSApplicationDelegate d) {
+        Runtime.INSTANCE.objc_msgSend(this, setDelegate, d);
     }
 }

@@ -1,24 +1,33 @@
 package com.github.axet.desktop.os.mac;
 
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+
 import javax.swing.Icon;
-import javax.swing.JOptionPane;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.DesktopSysTray;
-import com.github.axet.desktop.os.mac.cocoa.NSApplication;
-import com.github.axet.desktop.os.mac.cocoa.NSDocTile;
+import com.github.axet.desktop.os.mac.cocoa.NSFont;
 import com.github.axet.desktop.os.mac.cocoa.NSImage;
 import com.github.axet.desktop.os.mac.cocoa.NSMenu;
 import com.github.axet.desktop.os.mac.cocoa.NSMenuItem;
-import com.github.axet.desktop.os.mac.cocoa.NSRect;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusBar;
 import com.github.axet.desktop.os.mac.cocoa.NSStatusItem;
 import com.github.axet.desktop.os.mac.cocoa.NSString;
-import com.github.axet.desktop.os.mac.cocoa.NSWindow;
 
 public class OSXSysTray extends DesktopSysTray {
 
-    Icon icon;
+    BufferedImage icon;
+
+    JPopupMenu menu;
+
+    NSStatusItem statusItem;
 
     public final static int NSVariableStatusItemLength = -1;
     public final static int NSSquareStatusItemLength = -2;
@@ -29,62 +38,175 @@ public class OSXSysTray extends DesktopSysTray {
 
     }
 
+    static BufferedImage createBitmap(Icon icon) {
+        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = bi.createGraphics();
+        icon.paintIcon(null, g, 0, 0);
+        g.dispose();
+        return bi;
+    }
+
     @Override
     public void setIcon(Icon icon) {
-        this.icon = icon;
+        this.icon = createBitmap(icon);
+
+        NSFont f = NSFont.menuBarFontOfSize(0);
+        int menubarHeigh = (int) f.pointSize();
+
+        BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics2D = scaledImage.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics2D.drawImage(this.icon, 0, 0, menubarHeigh, menubarHeigh, null);
+        graphics2D.dispose();
+
+        this.icon = scaledImage;
+    }
+
+    NSImage getMenuImage(Icon icon) {
+        BufferedImage img = createBitmap(icon);
+
+        NSFont f = NSFont.menuFontOfSize(0);
+        int menubarHeigh = (int) f.pointSize();
+
+        BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics2D = scaledImage.createGraphics();
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics2D.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
+        graphics2D.dispose();
+
+        return new NSImage(scaledImage);
     }
 
     @Override
     public void setTitle(String title) {
-        // TODO Auto-generated method stub
-
-    }
-
-    void assertEquals(Object o, Object b) {
 
     }
 
     @Override
     public void show() {
-        NSMenu m = new NSMenu();
+        updateMenus();
+    }
 
+    void updateMenus() {
+        if (statusItem == null) {
+            NSStatusBar b = new NSStatusBar();
+            statusItem = b.statusItemWithLength(NSVariableStatusItemLength);
+        }
+
+        NSMenu m = new NSMenu();
         NSImage n = new NSImage(icon);
 
-        NSApplication a = new NSApplication();
+        statusItem.setImage(n);
+        statusItem.setHighlightMode(true);
+        statusItem.setMenu(m);
 
-        NSDocTile nd = a.dockTile();
-        nd.setBadgeLabel(new NSString("test"));
+        for (int i = 0; i < menu.getComponentCount(); i++) {
+            Component e = menu.getComponent(i);
 
-        boolean bb = a.isRunning();
-        bb = a.isActive();
-        long aa = a.requestUserAttention(NSApplication.NSCriticalRequest);
-        a.setApplicationIconImage(n);
-        a.cancelUserAttentionRequest(aa);
+            if (e instanceof JMenu) {
+                JMenu sub = (JMenu) e;
+                NSMenu hsub = createSubmenu(sub);
 
-        NSRect rect = new NSRect(0, 0, 200, 200);
-        NSWindow w = NSWindow.initWithContentRectStyleMaskBackingDefer(new NSRect.ByValue(rect),
-                NSWindow.NSBorderlessWindowMask, NSWindow.NSBackingStoreBuffered, false);
-        w.makeKeyAndOrderFront(a);
+                NSImage bm = null;
+                if (sub.getIcon() != null)
+                    bm = getMenuImage(sub.getIcon());
 
-        NSMenuItem item = new NSMenuItem();
-        item.setTitle(new NSString("Test"));
-        m.addItem(item);
+                NSMenuItem item = new NSMenuItem();
+                item.setTitle(new NSString(sub.getText()));
+                item.setImage(bm);
+                item.setSubmenu(hsub);
+                m.addItem(item);
+            } else if (e instanceof JCheckBoxMenuItem) {
+                JCheckBoxMenuItem ch = (JCheckBoxMenuItem) e;
 
-        NSStatusBar b = new NSStatusBar();
-        NSStatusItem i = b.statusItemWithLength(NSVariableStatusItemLength);
-        i.setTitle(new NSString("test"));
-        // i.setImage(n);
-        i.setHighlightMode(true);
-        i.setMenu(m);
+                NSImage bm = null;
+                if (ch.getIcon() != null)
+                    bm = getMenuImage(ch.getIcon());
 
-        JOptionPane.showMessageDialog(null, "asdfsdf");
+                NSMenuItem item = new NSMenuItem();
+                item.setTitle(new NSString(ch.getText()));
+                item.setImage(bm);
+                item.setEnabled(ch.isEnabled());
+                item.setState(ch.getState() ? 1 : 0);
+                m.addItem(item);
+            } else if (e instanceof JMenuItem) {
+                JMenuItem mi = (JMenuItem) e;
 
+                NSImage bm = null;
+                if (mi.getIcon() != null)
+                    bm = getMenuImage(mi.getIcon());
+
+                NSMenuItem item = new NSMenuItem();
+                item.setTitle(new NSString(mi.getText()));
+                item.setImage(bm);
+                item.setEnabled(mi.isEnabled());
+                m.addItem(item);
+            }
+
+            if (e instanceof JPopupMenu.Separator) {
+                m.addItem(NSMenuItem.separatorItem());
+            }
+        }
+    }
+
+    NSMenu createSubmenu(JMenu menu) {
+        NSMenu m = new NSMenu();
+
+        for (int i = 0; i < menu.getMenuComponentCount(); i++) {
+            Component e = menu.getMenuComponent(i);
+
+            if (e instanceof JMenu) {
+                JMenu sub = (JMenu) e;
+                NSMenu hsub2 = createSubmenu(sub);
+
+                NSImage bm = null;
+                if (sub.getIcon() != null)
+                    bm = getMenuImage(sub.getIcon());
+
+                NSMenuItem item = new NSMenuItem();
+                item.setTitle(new NSString(sub.getText()));
+                item.setImage(bm);
+                item.setSubmenu(hsub2);
+                m.addItem(item);
+            } else if (e instanceof JCheckBoxMenuItem) {
+                JCheckBoxMenuItem ch = (JCheckBoxMenuItem) e;
+
+                NSImage bm = null;
+                if (ch.getIcon() != null)
+                    bm = getMenuImage(ch.getIcon());
+
+                NSMenuItem item = new NSMenuItem();
+                item.setTitle(new NSString(ch.getText()));
+                item.setImage(bm);
+                item.setEnabled(ch.isEnabled());
+                item.setState(ch.getState() ? 1 : 0);
+                m.addItem(item);
+            } else if (e instanceof JMenuItem) {
+                JMenuItem mi = (JMenuItem) e;
+
+                NSImage bm = null;
+                if (mi.getIcon() != null)
+                    bm = getMenuImage(mi.getIcon());
+
+                NSMenuItem item = new NSMenuItem();
+                item.setTitle(new NSString(mi.getText()));
+                item.setImage(bm);
+                item.setEnabled(mi.isEnabled());
+                m.addItem(item);
+
+            }
+
+            if (e instanceof JPopupMenu.Separator) {
+                m.addItem(NSMenuItem.separatorItem());
+            }
+        }
+
+        return m;
     }
 
     @Override
     public void update() {
-        // TODO Auto-generated method stub
-
+        updateMenus();
     }
 
     @Override
@@ -95,8 +217,7 @@ public class OSXSysTray extends DesktopSysTray {
 
     @Override
     public void setMenu(JPopupMenu menu) {
-        // TODO Auto-generated method stub
-
+        this.menu = menu;
     }
 
     @Override

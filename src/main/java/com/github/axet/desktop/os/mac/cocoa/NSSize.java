@@ -41,6 +41,6 @@ public class NSSize extends Structure {
         read();
     }
 
-    public long width;
-    public long height;
+    public double width;
+    public double height;
 }

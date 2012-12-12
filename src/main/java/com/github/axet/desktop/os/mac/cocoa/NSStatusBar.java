@@ -31,7 +31,7 @@ public class NSStatusBar extends NSObject {
         release();
     }
 
-    public NSStatusItem statusItemWithLength(long i) {
+    public NSStatusItem statusItemWithLength(double i) {
         return new NSStatusItem(Runtime.INSTANCE.objc_msgSend(this, statusItemWithLength, i));
     }
 

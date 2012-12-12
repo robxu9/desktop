@@ -165,6 +165,7 @@ public class SysTrayTest extends JFrame {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 System.out.println("test5");
+                sys.update();
             }
         });
         menu.add(menuItem5);

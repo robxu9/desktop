@@ -41,6 +41,6 @@ public class NSPoint extends Structure {
         read();
     }
 
-    public long x;
-    public long y;
+    public double x;
+    public double y;
 }
