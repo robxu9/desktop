@@ -1,16 +1,24 @@
 package com.github.axet.desktop.os.mac;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 
+import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.github.axet.desktop.DesktopSysTray;
 import com.github.axet.desktop.os.mac.cocoa.NSFont;
@@ -226,8 +234,11 @@ public class OSXSysTray extends DesktopSysTray {
 
     @Override
     public void hide() {
-        // TODO Auto-generated method stub
-
+        if (statusItem != null) {
+            NSStatusBar b = new NSStatusBar();
+            b.removeStatusItem(statusItem);
+            statusItem = null;
+        }
     }
 
     @Override
@@ -237,8 +248,7 @@ public class OSXSysTray extends DesktopSysTray {
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-
+        hide();
     }
 
 }
