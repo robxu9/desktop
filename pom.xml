@@ -4,7 +4,7 @@
 
   <groupId>com.github.axet</groupId>
   <artifactId>desktop</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.0</version>
   <packaging>jar</packaging>
 
   <name>desktop</name>
@@ -47,8 +47,13 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.8.1</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jclarion</groupId>
+      <artifactId>image4j</artifactId>
+      <version>0.7</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>

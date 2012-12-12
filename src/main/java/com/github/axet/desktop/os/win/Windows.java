@@ -1,12 +1,14 @@
 package com.github.axet.desktop.os.win;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.apache.commons.lang.SystemUtils;
 
-import com.github.axet.desktop.Desktop;
-import com.sun.jna.Memory;
+import com.github.axet.desktop.DesktopFolders;
+import com.github.axet.desktop.os.win.libs.Ole32Ex;
+import com.github.axet.desktop.os.win.libs.Shell32Ex;
+import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.ptr.PointerByReference;
 
 /**
@@ -16,14 +18,14 @@ import com.sun.jna.ptr.PointerByReference;
  * users-home-directory-in-java
  * 
  */
-public class Windows extends Desktop {
+public class Windows implements DesktopFolders {
 
     public File getHome() {
         return new File(System.getenv("USERPROFILE"));
     }
 
     public File getDocuments() {
-        return path(Shell32.CSIDL_PERSONAL);
+        return path(Shell32Ex.CSIDL_PERSONAL);
     }
 
     public File getDownloads() {
@@ -37,7 +39,7 @@ public class Windows extends Desktop {
     //
     // http://stackoverflow.com/questions/7672774/how-do-i-determine-the-windows-download-folder-path
     //
-    
+
     /**
      * 
      * 
@@ -46,16 +48,16 @@ public class Windows extends Desktop {
     public File getDownloadsVista() {
         GUID guid = new GUID("374DE290-123F-4565-9164-39C4925E467B");
 
-        int dwFlags = Shell32.SHGFP_TYPE_CURRENT;
+        int dwFlags = Shell32Ex.SHGFP_TYPE_CURRENT;
         PointerByReference pszPath = new PointerByReference();
 
-        int hResult = Shell32.INSTANCE.SHGetKnownFolderPath(guid, dwFlags, null, pszPath);
+        int hResult = Shell32Ex.INSTANCE.SHGetKnownFolderPath(guid, dwFlags, null, pszPath);
         switch (hResult) {
-        case Shell32.S_FILE_NOT_FOUND:
+        case Shell32Ex.S_FILE_NOT_FOUND:
             throw new RuntimeException("File not Found");
-        case Shell32.S_OK:
+        case Shell32Ex.S_OK:
             String path = new String(pszPath.getValue().getString(0, true));
-            Ole32.INSTANCE.CoTaskMemFree(pszPath.getValue());
+            Ole32Ex.INSTANCE.CoTaskMemFree(pszPath.getValue());
             return new File(path);
         default:
             throw new RuntimeException("Error: " + Integer.toHexString(hResult));
@@ -64,27 +66,27 @@ public class Windows extends Desktop {
 
     @Override
     public File getAppData() {
-        return path(Shell32.CSIDL_LOCAL_APPDATA);
+        return path(Shell32Ex.CSIDL_LOCAL_APPDATA);
     }
 
     @Override
     public File getDesktop() {
-        return path(Shell32.CSIDL_DESKTOPDIRECTORY);
+        return path(Shell32Ex.CSIDL_DESKTOPDIRECTORY);
     }
 
     public File path(int nFolder) {
         HWND hwndOwner = null;
         HANDLE hToken = null;
-        int dwFlags = Shell32.SHGFP_TYPE_CURRENT;
-        char[] pszPath = new char[Shell32.MAX_PATH];
-        int hResult = Shell32.INSTANCE.SHGetFolderPath(hwndOwner, nFolder, hToken, dwFlags, pszPath);
-        if (Shell32.S_OK == hResult) {
+        int dwFlags = Shell32Ex.SHGFP_TYPE_CURRENT;
+        char[] pszPath = new char[Shell32Ex.MAX_PATH];
+        int hResult = Shell32Ex.INSTANCE.SHGetFolderPath(hwndOwner, nFolder, hToken, dwFlags, pszPath);
+        if (Shell32Ex.S_OK == hResult) {
             String path = new String(pszPath);
             int len = path.indexOf('\0');
             path = path.substring(0, len);
             return new File(path);
         } else {
-            throw new RuntimeException("Error: " + hResult);
+            throw new HResultException(hResult);
         }
     }
 

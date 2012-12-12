@@ -3,10 +3,12 @@ package com.github.axet.desktop.os.mac;
 import java.io.File;
 import java.lang.reflect.Method;
 
-import com.github.axet.desktop.Desktop;
-import com.github.axet.desktop.os.mac.foundation.NSFileNanager;
+import com.github.axet.desktop.DesktopFolders;
+import com.github.axet.desktop.os.mac.cocoa.NSArray;
+import com.github.axet.desktop.os.mac.cocoa.NSFileManager;
+import com.github.axet.desktop.os.mac.cocoa.NSURL;
 
-public class OSX extends Desktop {
+public class OSX implements DesktopFolders {
 
     @Override
     public File getAppData() {
@@ -33,17 +35,17 @@ public class OSX extends Desktop {
 
     @Override
     public File getDownloads() {
-        CFArrayRef a = NSFileNanager.INSTANCE.NSSearchPathForDirectoriesInDomains(
-                NSFileNanager.NSSearchPathDirectory.NSDownloadsDirectory,
-                NSFileNanager.NSSearchPathDomainMask.NSUserDomainMask, true);
+        NSFileManager f = new NSFileManager();
+        NSArray a = f.URLsForDirectoryInDomains(NSFileManager.NSSearchPathDirectory.NSDownloadsDirectory,
+                NSFileManager.NSSearchPathDomainMask.NSUserDomainMask);
 
-        int count = a.getCount();
+        long count = a.count();
         if (count != 1)
             throw new RuntimeException("Download folder not found");
 
-        CFStringRef path = new CFStringRef(a.get(0));
+        NSURL path = new NSURL(a.objectAtIndex(0));
 
-        return new File(path.toString());
+        return new File(path.path().toString());
     }
 
     private static Class<?> FileManagerClass;

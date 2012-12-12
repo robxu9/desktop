@@ -1,24 +1,3 @@
-# Desktop
-
-Java desktop functions. Have you tried to find user default Download folder using java? If so, you would find this
-library very helpful.
-
-## Example Desktop Folders
-    
-    public class DesktopTest {
-        public static void main(String[] args) {
-            DesktopFolders d = Desktop.getDesktopFolders();
-    
-            System.out.println("Home: " + d.getHome());
-            System.out.println("Documents: " + d.getDocuments());
-            System.out.println("AppFolder: " + d.getAppData());
-            System.out.println("Desktop: " + d.getDesktop());
-            System.out.println("Downloads: " + d.getDownloads());
-        }
-    }
-
-## Example Sys Tray Icon (Notification Area Icons or Status Bar ions)
-
     package com.github.axet.desktop;
     
     import java.awt.event.ActionEvent;
@@ -28,7 +7,7 @@ library very helpful.
     import javax.swing.JMenuItem;
     import javax.swing.JPopupMenu;
     
-    public class SysTrayTest extends JFrame {
+    public class SimpleTrayTest extends JFrame {
     
         DesktopSysTray sys = Desktop.getDesktopSysTray();
         JPopupMenu menu;
@@ -52,7 +31,7 @@ library very helpful.
     
         };
     
-        public SysTrayTest() {
+        public SimpleTrayTest() {
             super("MainFrame");
     
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -74,17 +53,6 @@ library very helpful.
         }
     
         public static void main(String[] args) {
-            new SysTrayTest();
+            new SimpleTrayTest();
         }
     }
-
-## Central Maven Repo
-
-	<dependencies>
-		<dependency>
-		  <groupId>com.github.axet</groupId>
-		  <artifactId>desktop</artifactId>
-		  <version>0.0.5</version>
-		</dependency>
-	</dependencies>
-		
