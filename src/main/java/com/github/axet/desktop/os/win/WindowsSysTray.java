@@ -142,9 +142,7 @@ public class WindowsSysTray extends DesktopSysTray {
                             }
                             break;
                         case WM_RBUTTONUP:
-                            for (Listener l : Collections.synchronizedCollection(listeners)) {
-                                l.mouseRightClick();
-                            }
+                            showContextMenu();
                             break;
                         }
                         break;
@@ -617,22 +615,21 @@ public class WindowsSysTray extends DesktopSysTray {
 
     public void show() {
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
-        nid.setTooltip(title);
         nid.hWnd = mp.hWnd;
-        nid.uCallbackMessage = WM_SHELLNOTIFY;
-        nid.hIcon = hicoTrayIcon;
+        nid.setTooltip(title);
+        nid.setIcon(hicoTrayIcon);
+        nid.setCallback(WM_SHELLNOTIFY);
 
         if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_ADD, nid))
             throw new GetLastErrorException();
     }
 
     public void update() {
-
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
-        nid.setTooltip(title);
         nid.hWnd = mp.hWnd;
-        nid.uCallbackMessage = WM_SHELLNOTIFY;
-        nid.hIcon = hicoTrayIcon;
+        nid.setTooltip(title);
+        nid.setIcon(hicoTrayIcon);
+        nid.setCallback(WM_SHELLNOTIFY);
 
         if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_MODIFY, nid))
             throw new GetLastErrorException();

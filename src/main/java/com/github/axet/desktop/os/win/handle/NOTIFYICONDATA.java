@@ -29,7 +29,6 @@ public class NOTIFYICONDATA extends Structure {
     }
 
     public NOTIFYICONDATA() {
-        uFlags = NIF_INFO | NIF_ICON | NIF_MESSAGE | NIF_TIP;
         cbSize = size();
     }
 
@@ -51,7 +50,18 @@ public class NOTIFYICONDATA extends Structure {
     public GUID guidItem = null;
     public HICON hBalloonIcon = null;
 
+    public void setIcon(HICON h) {
+        uFlags |= NIF_ICON;
+        hIcon = h;
+    }
+
+    public void setCallback(int i) {
+        uFlags |= NIF_MESSAGE;
+        uCallbackMessage = i;
+    }
+
     public void setTooltip(String s) {
+        uFlags |= NIF_INFO | NIF_TIP;
         System.arraycopy(s.toCharArray(), 0, szTip, 0, Math.min(s.length(), szTip.length));
         System.arraycopy(s.toCharArray(), 0, szInfoTitle, 0, Math.min(s.length(), szInfoTitle.length));
         System.arraycopy(s.toCharArray(), 0, szInfo, 0, Math.min(s.length(), szInfo.length));

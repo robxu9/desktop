@@ -18,8 +18,6 @@ public abstract class DesktopSysTray {
         public void mouseLeftClick();
 
         public void mouseLeftDoubleClick();
-
-        public void mouseRightClick();
     }
 
     protected Set<Listener> listeners = new HashSet<Listener>();
