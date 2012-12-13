@@ -3,7 +3,6 @@ package com.github.axet.desktop.os.mac;
 import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -52,10 +51,10 @@ public class OSXSysTray extends DesktopSysTray {
         int menubarHeigh = (int) f.pointSize();
 
         BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = scaledImage.createGraphics();
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-        graphics2D.drawImage(this.icon, 0, 0, menubarHeigh, menubarHeigh, null);
-        graphics2D.dispose();
+        Graphics2D g = scaledImage.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+        g.drawImage(this.icon, 0, 0, menubarHeigh, menubarHeigh, null);
+        g.dispose();
 
         this.icon = scaledImage;
     }
@@ -67,13 +66,10 @@ public class OSXSysTray extends DesktopSysTray {
         int menubarHeigh = (int) f.pointSize();
 
         BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = scaledImage.createGraphics();
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-        graphics2D.fillRect(0, 0, menubarHeigh, menubarHeigh);
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
-        graphics2D.dispose();
+        Graphics2D g = scaledImage.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+        g.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
+        g.dispose();
 
         return new NSImage(scaledImage);
     }
