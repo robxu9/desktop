@@ -1,5 +1,6 @@
 package com.github.axet.desktop.os.win;
 
+import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -295,7 +296,8 @@ public class WindowsSysTray extends DesktopSysTray {
 
     BufferedImage createBm(Icon icon) {
         BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics g = bi.createGraphics();
+        Graphics2D g = bi.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
         icon.paintIcon(null, g, 0, 0);
         g.dispose();
         return bi;
@@ -303,7 +305,8 @@ public class WindowsSysTray extends DesktopSysTray {
 
     HBITMAP createBitmap(Icon icon) {
         BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics g = bi.createGraphics();
+        Graphics2D g = bi.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
         icon.paintIcon(null, g, 0, 0);
         g.dispose();
         return createBitmap(bi);
@@ -323,7 +326,8 @@ public class WindowsSysTray extends DesktopSysTray {
 
         try {
             BufferedImage buf = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
-            Graphics g = buf.getGraphics();
+            Graphics2D g = (Graphics2D) buf.getGraphics();
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
             g.drawImage(image, 0, 0, w, h, null);
 
             BITMAPINFO bmi = new BITMAPINFO();
@@ -365,10 +369,10 @@ public class WindowsSysTray extends DesktopSysTray {
         int menubarHeigh = User32.INSTANCE.GetSystemMetrics(SM_CYMENUCHECK);
 
         BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = scaledImage.createGraphics();
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
-        graphics2D.dispose();
+        Graphics2D g = scaledImage.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+        g.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
+        g.dispose();
 
         return createBitmap(scaledImage);
     }
