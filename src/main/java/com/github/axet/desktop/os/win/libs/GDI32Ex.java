@@ -3,7 +3,6 @@ package com.github.axet.desktop.os.win.libs;
 import com.github.axet.desktop.os.win.handle.COLORREF;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
-import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinDef.HDC;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser.SIZE;

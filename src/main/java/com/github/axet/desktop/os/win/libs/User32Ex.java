@@ -9,7 +9,6 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.WinDef.HBITMAP;
-import com.sun.jna.platform.win32.WinDef.HDC;
 import com.sun.jna.platform.win32.WinDef.HICON;
 import com.sun.jna.platform.win32.WinDef.HINSTANCE;
 import com.sun.jna.platform.win32.WinDef.HMENU;
@@ -29,6 +28,7 @@ public interface User32Ex extends Library {
     public static final int COLOR_MENUTEXT = 7;
     public static final int COLOR_HIGHLIGHTTEXT = 14;
     public static final int COLOR_HIGHLIGHT = 13;
+    public static final int COLOR_GRAYTEXT = 17;
 
     static User32Ex INSTANCE = (User32Ex) Native.loadLibrary("user32", User32Ex.class, W32APIOptions.DEFAULT_OPTIONS);
 
