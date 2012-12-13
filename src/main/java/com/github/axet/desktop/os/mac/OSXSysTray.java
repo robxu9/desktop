@@ -32,10 +32,6 @@ public class OSXSysTray extends DesktopSysTray {
     NSStatusItem statusItem;
 
     @Override
-    public void showContextMenu() {
-    }
-
-    @Override
     public void setIcon(Icon icon) {
         this.icon = Utils.createBitmap(icon);
 
