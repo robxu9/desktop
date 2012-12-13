@@ -45,12 +45,6 @@ public class SysTrayTest extends JFrame {
         public void mouseLeftDoubleClick() {
             System.out.println("double click");
         }
-
-        @Override
-        public void mouseRightClick() {
-            sys.showContextMenu();
-        }
-
     };
 
     public SysTrayTest() {

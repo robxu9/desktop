@@ -33,7 +33,7 @@ public class HIconWrap extends HICON {
     }
 
     public HIconWrap(HBitmapWrap bm) {
-        super(createIconIndirect(bm).getPointer());
+        setPointer(createIconIndirect(bm).getPointer());
     }
 
     protected void finalize() throws Throwable {

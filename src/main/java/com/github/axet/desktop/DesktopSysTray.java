@@ -19,7 +19,14 @@ public abstract class DesktopSysTray {
 
         public void mouseLeftDoubleClick();
 
-        public void mouseRightClick();
+        // we do not handle right click, because:
+        //
+        // 1) it is binded to context menu anyway
+        //
+        // 2) if you call showContextMenu from another java thread, HMENU bugged
+        // and you can't use it.
+        //
+        // 3) Mac OSX dose not support show context menu programmatically
     }
 
     protected Set<Listener> listeners = new HashSet<Listener>();
@@ -31,13 +38,6 @@ public abstract class DesktopSysTray {
     public void removeListener(Listener l) {
         listeners.remove(l);
     }
-
-    /**
-     * show context menu.
-     * 
-     * OSX dose not support it. Just ignores it.
-     */
-    public abstract void showContextMenu();
 
     public abstract void setIcon(Icon icon);
 

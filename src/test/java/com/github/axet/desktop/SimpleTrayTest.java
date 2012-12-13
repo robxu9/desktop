@@ -22,13 +22,6 @@ import javax.swing.JPopupMenu;
             public void mouseLeftDoubleClick() {
                 System.out.println("double click");
             }
-    
-            @Override
-            public void mouseRightClick() {
-                System.out.println("right click");
-                sys.showContextMenu();
-            }
-    
         };
     
         public SimpleTrayTest() {
