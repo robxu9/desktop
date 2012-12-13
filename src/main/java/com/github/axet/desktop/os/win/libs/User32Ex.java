@@ -1,10 +1,13 @@
 package com.github.axet.desktop.os.win.libs;
 
 import com.github.axet.desktop.os.win.handle.ATOM;
+import com.github.axet.desktop.os.win.handle.COLORREF;
 import com.github.axet.desktop.os.win.handle.ICONINFO;
+import com.github.axet.desktop.os.win.handle.MENUITEMINFO;
 import com.github.axet.desktop.os.win.handle.WNDCLASSEX;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.WinDef.HBITMAP;
 import com.sun.jna.platform.win32.WinDef.HICON;
 import com.sun.jna.platform.win32.WinDef.HINSTANCE;
@@ -20,6 +23,12 @@ import com.sun.jna.win32.W32APIOptions;
 public interface User32Ex extends Library {
 
     public static final int WS_OVERLAPPEDWINDOW = 0xcf0000;
+    public static final int SPI_GETNONCLIENTMETRICS = 0x0029;
+    public static final int COLOR_MENU = 4;
+    public static final int COLOR_MENUTEXT = 7;
+    public static final int COLOR_HIGHLIGHTTEXT = 14;
+    public static final int COLOR_HIGHLIGHT = 13;
+    public static final int COLOR_GRAYTEXT = 17;
 
     static User32Ex INSTANCE = (User32Ex) Native.loadLibrary("user32", User32Ex.class, W32APIOptions.DEFAULT_OPTIONS);
 
@@ -132,5 +141,33 @@ public interface User32Ex extends Library {
      * *prcRect );
      */
     boolean TrackPopupMenu(HMENU hMenu, int uFlags, int x, int y, int nReserved, HWND hWnd, RECT prcRect);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms648001(v=vs.85).aspx
+    /**
+     * BOOL WINAPI SetMenuItemInfo( _In_ HMENU hMenu, _In_ UINT uItem, _In_ BOOL
+     * fByPosition, _In_ LPMENUITEMINFO lpmii );
+     */
+    boolean SetMenuItemInfo(HMENU hMenu, int uItem, boolean fByPosition, MENUITEMINFO lpmii);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms647980(v=vs.85).aspx
+    /**
+     * BOOL WINAPI GetMenuItemInfo( _In_ HMENU hMenu, _In_ UINT uItem, _In_ BOOL
+     * fByPosition, _Inout_ LPMENUITEMINFO lpmii );
+     */
+    boolean GetMenuItemInfo(HMENU hMenu, int uItem, boolean fByPosition, MENUITEMINFO lpmii);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms724947(v=vs.85).aspx
+    /**
+     * BOOL WINAPI SystemParametersInfo( _In_ UINT uiAction, _In_ UINT uiParam,
+     * _Inout_ PVOID pvParam, _In_ UINT fWinIni );
+     */
+    boolean SystemParametersInfo(int uiAction, int uiParam, Structure pvParam, int fWinIni);
+
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms724371(v=vs.85).aspx
+    /**
+     * 
+     DWORD WINAPI GetSysColor( _In_ int nIndex );
+     */
+    COLORREF GetSysColor(int nIndex);
 
 }

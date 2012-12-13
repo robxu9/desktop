@@ -3,7 +3,6 @@ package com.github.axet.desktop.os.mac;
 import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -14,6 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.DesktopSysTray;
+import com.github.axet.desktop.Utils;
 import com.github.axet.desktop.os.mac.cocoa.NSFont;
 import com.github.axet.desktop.os.mac.cocoa.NSImage;
 import com.github.axet.desktop.os.mac.cocoa.NSMenu;
@@ -35,45 +35,33 @@ public class OSXSysTray extends DesktopSysTray {
     public void showContextMenu() {
     }
 
-    static BufferedImage createBitmap(Icon icon) {
-        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = bi.createGraphics();
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-        icon.paintIcon(null, g, 0, 0);
-        g.dispose();
-        return bi;
-    }
-
     @Override
     public void setIcon(Icon icon) {
-        this.icon = createBitmap(icon);
+        this.icon = Utils.createBitmap(icon);
 
         NSFont f = NSFont.menuBarFontOfSize(0);
         int menubarHeigh = (int) f.pointSize();
 
         BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = scaledImage.createGraphics();
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-        graphics2D.drawImage(this.icon, 0, 0, menubarHeigh, menubarHeigh, null);
-        graphics2D.dispose();
+        Graphics2D g = scaledImage.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+        g.drawImage(this.icon, 0, 0, menubarHeigh, menubarHeigh, null);
+        g.dispose();
 
         this.icon = scaledImage;
     }
 
     NSImage getMenuImage(Icon icon) {
-        BufferedImage img = createBitmap(icon);
+        BufferedImage img = Utils.createBitmap(icon);
 
         NSFont f = NSFont.menuFontOfSize(0);
         int menubarHeigh = (int) f.pointSize();
 
         BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = scaledImage.createGraphics();
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-        graphics2D.fillRect(0, 0, menubarHeigh, menubarHeigh);
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
-        graphics2D.dispose();
+        Graphics2D g = scaledImage.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+        g.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
+        g.dispose();
 
         return new NSImage(scaledImage);
     }

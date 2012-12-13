@@ -1,17 +1,17 @@
 package com.github.axet.desktop.os.win;
 
+import java.awt.AlphaComposite;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -19,31 +19,41 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import com.github.axet.desktop.DesktopSysTray;
-import com.github.axet.desktop.os.win.handle.ATOM;
-import com.github.axet.desktop.os.win.handle.ICONINFO;
+import com.github.axet.desktop.Utils;
+import com.github.axet.desktop.os.win.handle.BLENDFUNCTION;
+import com.github.axet.desktop.os.win.handle.DRAWITEMSTRUCT;
+import com.github.axet.desktop.os.win.handle.LOGFONT;
+import com.github.axet.desktop.os.win.handle.MEASUREITEMSTRUCT;
+import com.github.axet.desktop.os.win.handle.MENUITEMINFO;
+import com.github.axet.desktop.os.win.handle.NONCLIENTMETRICS;
 import com.github.axet.desktop.os.win.handle.NOTIFYICONDATA;
-import com.github.axet.desktop.os.win.handle.WNDCLASSEX;
 import com.github.axet.desktop.os.win.handle.WNDPROC;
+import com.github.axet.desktop.os.win.libs.GDI32Ex;
+import com.github.axet.desktop.os.win.libs.Msimg32;
 import com.github.axet.desktop.os.win.libs.Shell32Ex;
 import com.github.axet.desktop.os.win.libs.User32Ex;
+import com.github.axet.desktop.os.win.wrap.HBitmapWrap;
+import com.github.axet.desktop.os.win.wrap.HIconWrap;
+import com.github.axet.desktop.os.win.wrap.WndClassExWrap;
 import com.sun.jna.Pointer;
-import com.sun.jna.WString;
+import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
 import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HBITMAP;
 import com.sun.jna.platform.win32.WinDef.HDC;
-import com.sun.jna.platform.win32.WinDef.HICON;
+import com.sun.jna.platform.win32.WinDef.HFONT;
 import com.sun.jna.platform.win32.WinDef.HINSTANCE;
 import com.sun.jna.platform.win32.WinDef.HMENU;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
+import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
-import com.sun.jna.platform.win32.WinGDI;
-import com.sun.jna.platform.win32.WinGDI.BITMAPINFO;
+import com.sun.jna.platform.win32.WinNT.HANDLE;
+import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.MSG;
-import com.sun.jna.ptr.PointerByReference;
+import com.sun.jna.platform.win32.WinUser.SIZE;
 
 // http://www.nevaobject.com/_docs/_coroutine/coroutine.htm
 
@@ -66,6 +76,8 @@ public class WindowsSysTray extends DesktopSysTray {
     public static final int SW_SHOW = 5;
     public static final int WM_COMMAND = 0x0111;
     public static final int WM_SHELLNOTIFY = WM_USER + 1;
+    public static final int WM_MEASUREITEM = 44;
+    public static final int WM_DRAWITEM = 43;
 
     public static final int MF_ENABLED = 0;
     public static final int MF_DISABLED = 0x00000002;
@@ -73,6 +85,7 @@ public class WindowsSysTray extends DesktopSysTray {
     public static final int MF_UNCHECKED = 0;
     public static final int MF_GRAYED = 0x00000001;
     public static final int MF_STRING = 0x00000000;
+    public static final int MFT_OWNERDRAW = 256;
     public static final int MF_SEPARATOR = 0x00000800;
     public static final int MF_POPUP = 0x00000010;
 
@@ -80,11 +93,12 @@ public class WindowsSysTray extends DesktopSysTray {
 
     public static final int SM_CYMENUCHECK = 72;
 
+    static final int SPACE_ICONS = 2;
+
     public class MessagePump implements Runnable {
         Thread t;
 
-        final String klass = "SystemTrayIcon";
-        ATOM wcatom;
+        WndClassExWrap wc;
         WNDPROC WndProc;
         HWND hWnd;
         HINSTANCE hInstance;
@@ -131,8 +145,24 @@ public class WindowsSysTray extends DesktopSysTray {
                         break;
                     case WM_COMMAND: {
                         int nID = wParam.intValue() & 0xff;
-                        MenuMap m = hmenusids.get(nID);
+                        MenuMap m = hMenusIDs.get(nID);
                         m.fire();
+                        break;
+                    }
+                    case WM_MEASUREITEM: {
+                        MEASUREITEMSTRUCT ms = new MEASUREITEMSTRUCT(new Pointer(lParam.longValue()));
+                        MenuMap mm = hMenusIDs.get(ms.itemData.intValue());
+                        SIZE size = measureItem(hWnd, mm);
+                        ms.itemWidth = size.cx;
+                        ms.itemHeight = size.cy;
+                        ms.write();
+                        break;
+                    }
+                    case WM_DRAWITEM: {
+                        DRAWITEMSTRUCT di = new DRAWITEMSTRUCT(new Pointer(lParam.longValue()));
+                        MenuMap mm = hMenusIDs.get(di.itemData.intValue());
+
+                        drawItem(mm, di.hDC, di.rcItem, di.itemState);
                         break;
                     }
                     case WM_QUIT:
@@ -155,24 +185,10 @@ public class WindowsSysTray extends DesktopSysTray {
         HWND createWindow() {
             hInstance = Kernel32.INSTANCE.GetModuleHandle(null);
 
-            WNDCLASSEX wc = new WNDCLASSEX();
-            wc.cbSize = wc.size();
-            wc.style = 0;
-            wc.lpfnWndProc = WndProc;
-            wc.cbClsExtra = 0;
-            wc.cbWndExtra = 0;
-            wc.hInstance = hInstance;
-            wc.hIcon = null;
-            wc.hbrBackground = null;
-            wc.lpszMenuName = null;
-            wc.lpszClassName = new WString(klass);
+            wc = new WndClassExWrap(hInstance, WndProc, "SystemTrayIcon");
 
-            wcatom = User32Ex.INSTANCE.RegisterClassEx(wc);
-            if (wcatom == null)
-                throw new GetLastErrorException();
-
-            HWND hwnd = User32Ex.INSTANCE.CreateWindowEx(0, klass, klass, User32Ex.WS_OVERLAPPEDWINDOW, 0, 0, 0, 0,
-                    null, null, hInstance, null);
+            HWND hwnd = User32Ex.INSTANCE.CreateWindowEx(0, wc.getName(), wc.getName(), User32Ex.WS_OVERLAPPEDWINDOW,
+                    0, 0, 0, 0, null, null, hInstance, null);
 
             if (hwnd == null)
                 throw new GetLastErrorException();
@@ -197,6 +213,20 @@ public class WindowsSysTray extends DesktopSysTray {
             destory();
         }
 
+        SIZE measureItem(HWND hWnd, MenuMap mm) {
+            HDC hdc = User32.INSTANCE.GetDC(hWnd);
+            HFONT hfntOld = (HFONT) GDI32.INSTANCE.SelectObject(hdc, getSystemMenuFont());
+            SIZE size = new SIZE();
+            if (!GDI32Ex.INSTANCE.GetTextExtentPoint32(hdc, mm.item.getText(), mm.item.getText().length(), size))
+                throw new GetLastErrorException();
+            GDI32.INSTANCE.SelectObject(hdc, hfntOld);
+            User32.INSTANCE.ReleaseDC(hWnd, hdc);
+
+            size.cx += (getSystemMenuImageSize() + SPACE_ICONS) * 2;
+
+            return size;
+        }
+
         void destory() {
             if (hWnd != null) {
                 if (!User32Ex.INSTANCE.DestroyWindow(hWnd))
@@ -204,10 +234,9 @@ public class WindowsSysTray extends DesktopSysTray {
                 hWnd = null;
             }
 
-            if (wcatom != null) {
-                if (!User32Ex.INSTANCE.UnregisterClass(klass, hInstance))
-                    throw new GetLastErrorException();
-                wcatom = null;
+            if (wc != null) {
+                wc.close();
+                wc = null;
             }
         }
 
@@ -223,12 +252,29 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     static class MenuMap {
-        public HBITMAP hbm;
+        public HBitmapWrap hbm;
         public JMenuItem item;
 
-        public MenuMap(JMenuItem item, HBITMAP hbm) {
-            this.hbm = hbm;
+        public MenuMap(JMenuItem item) {
             this.item = item;
+
+            if (item.getIcon() != null) {
+                Icon icon = item.getIcon();
+                hbm = getMenuImage(icon);
+            }
+        }
+
+        protected void finalize() throws Throwable {
+            close();
+
+            super.finalize();
+        }
+
+        public void close() {
+            if (hbm != null) {
+                GDI32.INSTANCE.DeleteObject(hbm);
+                hbm = null;
+            }
         }
 
         public void fire() {
@@ -241,18 +287,29 @@ public class WindowsSysTray extends DesktopSysTray {
 
     boolean close = false;
 
-    Icon icon;
     String title;
     JPopupMenu menu;
 
-    HBITMAP hbm;
-    HICON hico;
-    List<HMENU> hmenus = new ArrayList<HMENU>();
+    HBitmapWrap hbitmapChecked;
+    HBitmapWrap hbitmapUnchecked;
+    HBitmapWrap hbitmapTrayIcon;
+    HIconWrap hicoTrayIcon;
+    // free HMENU later, when close
+    List<HMENU> hMenus = new ArrayList<HMENU>();
     // position in this list == id of HMENU item
-    List<MenuMap> hmenusids = new ArrayList<MenuMap>();
+    List<MenuMap> hMenusIDs = new ArrayList<MenuMap>();
 
     public WindowsSysTray() {
         create();
+
+        try {
+            BufferedImage checked = ImageIO.read(WindowsSysTray.class.getResourceAsStream("checked.png"));
+            hbitmapChecked = new HBitmapWrap(checked);
+            BufferedImage unchecked = ImageIO.read(WindowsSysTray.class.getResourceAsStream("unchecked.png"));
+            hbitmapUnchecked = new HBitmapWrap(unchecked);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     void create() {
@@ -264,13 +321,22 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     public void close() {
-        if (hbm != null) {
-            GDI32.INSTANCE.DeleteObject(hbm);
-            hbm = null;
+        if (hbitmapChecked != null) {
+            hbitmapChecked.close();
+            hbitmapChecked = null;
         }
-        if (hico != null) {
-            GDI32.INSTANCE.DeleteObject(hico);
-            hico = null;
+        if (hbitmapUnchecked != null) {
+            hbitmapUnchecked.close();
+            hbitmapUnchecked = null;
+        }
+
+        if (hbitmapTrayIcon != null) {
+            hbitmapTrayIcon.close();
+            hbitmapTrayIcon = null;
+        }
+        if (hicoTrayIcon != null) {
+            hicoTrayIcon.close();
+            hicoTrayIcon = null;
         }
         clearMenus();
 
@@ -293,103 +359,92 @@ public class WindowsSysTray extends DesktopSysTray {
         close();
     }
 
-    BufferedImage createBm(Icon icon) {
-        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics g = bi.createGraphics();
-        icon.paintIcon(null, g, 0, 0);
-        g.dispose();
-        return bi;
+    static void drawHBITMAP(HBITMAP hbm, int x, int y, int cx, int cy, HDC hdcDst) {
+        HDC hdcSrc = GDI32.INSTANCE.CreateCompatibleDC(hdcDst);
+        HANDLE h = GDI32.INSTANCE.SelectObject(hdcSrc, hbm);
+
+        BLENDFUNCTION.ByValue bld = new BLENDFUNCTION.ByValue();
+        bld.BlendOp = WinUser.AC_SRC_OVER;
+        bld.BlendFlags = 0;
+        bld.SourceConstantAlpha = (byte) 255;
+        bld.AlphaFormat = WinUser.AC_SRC_ALPHA;
+
+        if (!Msimg32.INSTANCE.AlphaBlend(hdcDst, x, y, cx, cy, hdcSrc, 0, 0, cx, cy, bld))
+            throw new GetLastErrorException();
+        GDI32.INSTANCE.SelectObject(hdcSrc, h);
+        if (!GDI32.INSTANCE.DeleteDC(hdcSrc))
+            throw new GetLastErrorException();
     }
 
-    HBITMAP createBitmap(Icon icon) {
-        BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics g = bi.createGraphics();
-        icon.paintIcon(null, g, 0, 0);
-        g.dispose();
-        return createBitmap(bi);
-    }
+    void drawItem(MenuMap mm, HDC hDC, RECT rcItem, int itemState) {
+        if (!mm.item.isEnabled()) {
+            GDI32Ex.INSTANCE.SetTextColor(hDC, User32Ex.INSTANCE.GetSysColor(User32Ex.COLOR_GRAYTEXT));
+            GDI32Ex.INSTANCE.SetBkColor(hDC, User32Ex.INSTANCE.GetSysColor(User32Ex.COLOR_MENU));
+        } else if ((itemState & DRAWITEMSTRUCT.ODS_SELECTED) == DRAWITEMSTRUCT.ODS_SELECTED) {
+            GDI32Ex.INSTANCE.SetTextColor(hDC, User32Ex.INSTANCE.GetSysColor(User32Ex.COLOR_HIGHLIGHTTEXT));
+            GDI32Ex.INSTANCE.SetBkColor(hDC, User32Ex.INSTANCE.GetSysColor(User32Ex.COLOR_HIGHLIGHT));
+        } else {
+            GDI32Ex.INSTANCE.SetTextColor(hDC, User32Ex.INSTANCE.GetSysColor(User32Ex.COLOR_MENUTEXT));
+            GDI32Ex.INSTANCE.SetBkColor(hDC, User32Ex.INSTANCE.GetSysColor(User32Ex.COLOR_MENU));
+        }
+        int x = rcItem.left;
+        int y = rcItem.top;
 
-    // https://github.com/twall/jna/blob/master/contrib/alphamaskdemo/com/sun/jna/contrib/demo/AlphaMaskDemo.java
+        x += (getSystemMenuImageSize() + SPACE_ICONS) * 2;
 
-    HBITMAP createBitmap(BufferedImage image) {
-        User32 user = User32.INSTANCE;
-        GDI32 gdi = GDI32.INSTANCE;
+        GDI32.INSTANCE.SelectObject(hDC, getSystemMenuFont());
+        GDI32Ex.INSTANCE.ExtTextOut(hDC, x, y, GDI32Ex.ETO_OPAQUE, rcItem, mm.item.getText(), mm.item.getText()
+                .length(), null);
 
-        int w = image.getWidth(null);
-        int h = image.getHeight(null);
-        HDC screenDC = user.GetDC(null);
-        HDC memDC = gdi.CreateCompatibleDC(screenDC);
-        HBITMAP hBitmap = null;
+        x = rcItem.left;
 
-        try {
-            BufferedImage buf = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
-            Graphics g = buf.getGraphics();
-            g.drawImage(image, 0, 0, w, h, null);
-
-            BITMAPINFO bmi = new BITMAPINFO();
-            bmi.bmiHeader.biWidth = w;
-            bmi.bmiHeader.biHeight = h;
-            bmi.bmiHeader.biPlanes = 1;
-            bmi.bmiHeader.biBitCount = 32;
-            bmi.bmiHeader.biCompression = WinGDI.BI_RGB;
-            bmi.bmiHeader.biSizeImage = w * h * 4;
-
-            PointerByReference ppbits = new PointerByReference();
-            hBitmap = gdi.CreateDIBSection(memDC, bmi, WinGDI.DIB_RGB_COLORS, ppbits, null, 0);
-            Pointer pbits = ppbits.getValue();
-
-            Raster raster = buf.getData();
-            int[] pixel = new int[4];
-            int[] bits = new int[w * h];
-            for (int y = 0; y < h; y++) {
-                for (int x = 0; x < w; x++) {
-                    raster.getPixel(x, h - y - 1, pixel);
-                    int alpha = (pixel[3] & 0xFF) << 24;
-                    int red = (pixel[2] & 0xFF);
-                    int green = (pixel[1] & 0xFF) << 8;
-                    int blue = (pixel[0] & 0xFF) << 16;
-                    bits[x + y * w] = alpha | red | green | blue;
-                }
+        if (mm.item instanceof JCheckBoxMenuItem) {
+            JCheckBoxMenuItem cc = (JCheckBoxMenuItem) mm.item;
+            if (cc.getState()) {
+                drawHBITMAP(hbitmapChecked, x, y, hbitmapChecked.getImage().getWidth(), hbitmapChecked.getImage()
+                        .getHeight(), hDC);
+            } else {
+                drawHBITMAP(hbitmapUnchecked, x, y, hbitmapUnchecked.getImage().getWidth(), hbitmapUnchecked.getImage()
+                        .getHeight(), hDC);
             }
-            pbits.write(0, bits, 0, bits.length);
-            return hBitmap;
-        } finally {
-            user.ReleaseDC(null, screenDC);
-            gdi.DeleteDC(memDC);
+        }
+
+        x += getSystemMenuImageSize() + SPACE_ICONS;
+
+        if (mm.hbm != null) {
+            drawHBITMAP(mm.hbm, x, y, mm.hbm.getImage().getWidth(), mm.hbm.getImage().getHeight(), hDC);
         }
     }
 
-    HBITMAP getMenuImage(Icon icon) {
-        BufferedImage img = createBm(icon);
+    static LOGFONT getSystemMenuFont() {
+        NONCLIENTMETRICS nm = new NONCLIENTMETRICS();
 
-        int menubarHeigh = User32.INSTANCE.GetSystemMetrics(SM_CYMENUCHECK);
-
-        BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = scaledImage.createGraphics();
-        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        graphics2D.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
-        graphics2D.dispose();
-
-        return createBitmap(scaledImage);
+        User32Ex.INSTANCE.SystemParametersInfo(User32Ex.SPI_GETNONCLIENTMETRICS, 0, nm, 0);
+        return nm.lfMenuFont;
     }
 
-    // http://www.pinvoke.net/default.aspx/user32.createiconindirect
+    static int getSystemMenuImageSize() {
+        return User32.INSTANCE.GetSystemMetrics(SM_CYMENUCHECK);
+    }
 
-    HICON createIconIndirect(HBITMAP bm) {
-        ICONINFO info = new ICONINFO();
-        info.IsIcon = true;
-        info.MaskBitmap = bm;
-        info.ColorBitmap = bm;
+    static HBitmapWrap getMenuImage(Icon icon) {
+        BufferedImage img = Utils.createBitmap(icon);
 
-        HICON hicon = User32Ex.INSTANCE.CreateIconIndirect(info);
-        if (hicon == null)
-            throw new GetLastErrorException();
+        int menubarHeigh = getSystemMenuImageSize();
 
-        return hicon;
+        BufferedImage scaledImage = new BufferedImage(menubarHeigh, menubarHeigh, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = scaledImage.createGraphics();
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+        g.drawImage(img, 0, 0, menubarHeigh, menubarHeigh, null);
+        g.dispose();
+
+        return new HBitmapWrap(scaledImage);
     }
 
     public void setIcon(Icon icon) {
-        this.icon = icon;
+        this.hbitmapTrayIcon = new HBitmapWrap(Utils.createBitmap(icon));
+        this.hicoTrayIcon = new HIconWrap(hbitmapTrayIcon);
+
     }
 
     public void setTitle(String t) {
@@ -397,14 +452,14 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     void clearMenus() {
-        for (HMENU hmenu : hmenus) {
+        for (HMENU hmenu : hMenus) {
             User32Ex.INSTANCE.DestroyMenu(hmenu);
         }
-        hmenus.clear();
-        for (MenuMap m : hmenusids) {
-            GDI32.INSTANCE.DeleteObject(m.hbm);
+        hMenus.clear();
+        for (MenuMap m : hMenusIDs) {
+            m.close();
         }
-        hmenusids.clear();
+        hMenusIDs.clear();
     }
 
     public void setMenu(JPopupMenu menu) {
@@ -415,7 +470,7 @@ public class WindowsSysTray extends DesktopSysTray {
         clearMenus();
 
         HMENU hmenu = User32Ex.INSTANCE.CreatePopupMenu();
-        hmenus.add(hmenu);
+        hMenus.add(hmenu);
 
         for (int i = 0; i < menu.getComponentCount(); i++) {
             Component e = menu.getComponent(i);
@@ -423,52 +478,56 @@ public class WindowsSysTray extends DesktopSysTray {
             if (e instanceof JMenu) {
                 JMenu sub = (JMenu) e;
                 HMENU hsub = createSubmenu(sub);
+                hMenus.add(hsub);
 
-                HBITMAP bm = null;
-                if (sub.getIcon() != null)
-                    bm = getMenuImage(sub.getIcon());
-                hmenusids.add(new MenuMap(sub, bm));
+                int nID = hMenusIDs.size();
+                hMenusIDs.add(new MenuMap(sub));
 
                 // you know, the usual windows tricks (transfer handle to
                 // decimal)
                 int handle = (int) Pointer.nativeValue(hsub.getPointer());
 
-                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MF_POPUP, handle, sub.getText()))
-                    throw new GetLastErrorException();
-                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hmenu, handle, 0, bm, bm))
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MF_POPUP | MFT_OWNERDRAW, handle, null))
                     throw new GetLastErrorException();
 
-                hmenus.add(hsub);
+                MENUITEMINFO mi = new MENUITEMINFO();
+                if (!User32Ex.INSTANCE.GetMenuItemInfo(hmenu, handle, false, mi))
+                    throw new GetLastErrorException();
+                mi.dwItemData = new ULONG_PTR(nID);
+                mi.fMask |= MENUITEMINFO.MIIM_DATA;
+                if (!User32Ex.INSTANCE.SetMenuItemInfo(hmenu, handle, false, mi))
+                    throw new GetLastErrorException();
             } else if (e instanceof JCheckBoxMenuItem) {
                 JCheckBoxMenuItem ch = (JCheckBoxMenuItem) e;
 
-                int nID = hmenusids.size();
-                HBITMAP bm = null;
-                if (ch.getIcon() != null)
-                    bm = getMenuImage(ch.getIcon());
-                hmenusids.add(new MenuMap(ch, bm));
+                int nID = hMenusIDs.size();
+                hMenusIDs.add(new MenuMap(ch));
 
-                if (!User32Ex.INSTANCE.AppendMenu(hmenu, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
-                        | (ch.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID, ch.getText()))
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MFT_OWNERDRAW, nID, null))
                     throw new GetLastErrorException();
-                // it will replace checkbox with an image
-                //
-                // if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hmenu, nID, 0, bm,
-                // bm))
-                // throw new GetLastErrorException();
+
+                MENUITEMINFO mmi = new MENUITEMINFO();
+                if (!User32Ex.INSTANCE.GetMenuItemInfo(hmenu, nID, false, mmi))
+                    throw new GetLastErrorException();
+                mmi.dwItemData = new ULONG_PTR(nID);
+                mmi.fMask |= MENUITEMINFO.MIIM_DATA;
+                if (!User32Ex.INSTANCE.SetMenuItemInfo(hmenu, nID, false, mmi))
+                    throw new GetLastErrorException();
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
 
-                int nID = hmenusids.size();
-                HBITMAP bm = null;
-                if (mi.getIcon() != null)
-                    bm = getMenuImage(mi.getIcon());
-                hmenusids.add(new MenuMap(mi, bm));
+                int nID = hMenusIDs.size();
+                hMenusIDs.add(new MenuMap(mi));
 
-                if (!User32Ex.INSTANCE.AppendMenu(hmenu, (mi.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID,
-                        mi.getText()))
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MFT_OWNERDRAW, nID, null))
                     throw new GetLastErrorException();
-                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hmenu, nID, 0, bm, bm))
+
+                MENUITEMINFO mmi = new MENUITEMINFO();
+                if (!User32Ex.INSTANCE.GetMenuItemInfo(hmenu, nID, false, mmi))
+                    throw new GetLastErrorException();
+                mmi.dwItemData = new ULONG_PTR(nID);
+                mmi.fMask |= MENUITEMINFO.MIIM_DATA;
+                if (!User32Ex.INSTANCE.SetMenuItemInfo(hmenu, nID, false, mmi))
                     throw new GetLastErrorException();
             }
 
@@ -480,114 +539,95 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     HMENU createSubmenu(JMenu menu) {
-        HMENU hsub = User32Ex.INSTANCE.CreatePopupMenu();
+        HMENU hmenu = User32Ex.INSTANCE.CreatePopupMenu();
 
         for (int i = 0; i < menu.getMenuComponentCount(); i++) {
             Component e = menu.getMenuComponent(i);
 
             if (e instanceof JMenu) {
                 JMenu sub = (JMenu) e;
-                HMENU hsub2 = createSubmenu(sub);
+                HMENU hsub = createSubmenu(sub);
+                hMenus.add(hsub);
 
                 // you know, the usual windows tricks (transfer handle to
                 // decimal)
-                int handle = (int) Pointer.nativeValue(hsub2.getPointer());
+                int handle = (int) Pointer.nativeValue(hsub.getPointer());
 
-                HBITMAP bm = null;
-                if (sub.getIcon() != null)
-                    bm = getMenuImage(sub.getIcon());
-                hmenusids.add(new MenuMap(sub, bm));
+                int nID = hMenusIDs.size();
+                hMenusIDs.add(new MenuMap(sub));
 
-                if (!User32Ex.INSTANCE.AppendMenu(hsub, MF_POPUP, handle, sub.getText()))
-                    throw new GetLastErrorException();
-                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hsub, handle, 0, bm, bm))
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MF_POPUP | MFT_OWNERDRAW, handle, null))
                     throw new GetLastErrorException();
 
-                hmenus.add(hsub2);
+                MENUITEMINFO mi = new MENUITEMINFO();
+                if (!User32Ex.INSTANCE.GetMenuItemInfo(hmenu, handle, false, mi))
+                    throw new GetLastErrorException();
+                mi.dwItemData = new ULONG_PTR(nID);
+                mi.fMask |= MENUITEMINFO.MIIM_DATA;
+                if (!User32Ex.INSTANCE.SetMenuItemInfo(hmenu, handle, false, mi))
+                    throw new GetLastErrorException();
             } else if (e instanceof JCheckBoxMenuItem) {
                 JCheckBoxMenuItem ch = (JCheckBoxMenuItem) e;
 
-                int nID = hmenusids.size();
-                HBITMAP bm = null;
-                if (ch.getIcon() != null)
-                    bm = getMenuImage(ch.getIcon());
-                hmenusids.add(new MenuMap(ch, bm));
+                int nID = hMenusIDs.size();
+                hMenusIDs.add(new MenuMap(ch));
 
-                if (!User32Ex.INSTANCE.AppendMenu(hsub, (ch.getState() ? MF_CHECKED : MF_UNCHECKED)
-                        | (ch.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID, ch.getText()))
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MFT_OWNERDRAW, nID, null))
                     throw new GetLastErrorException();
-                // it will replace checkbox with an image
-                //
-                // if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hsub, nID, 0, bm,
-                // bm))
-                // throw new GetLastErrorException();
+
+                MENUITEMINFO mi = new MENUITEMINFO();
+                if (!User32Ex.INSTANCE.GetMenuItemInfo(hmenu, nID, false, mi))
+                    throw new GetLastErrorException();
+                mi.dwItemData = new ULONG_PTR(nID);
+                mi.fMask |= MENUITEMINFO.MIIM_DATA;
+                if (!User32Ex.INSTANCE.SetMenuItemInfo(hmenu, nID, false, mi))
+                    throw new GetLastErrorException();
             } else if (e instanceof JMenuItem) {
                 JMenuItem mi = (JMenuItem) e;
 
-                int nID = hmenusids.size();
-                HBITMAP bm = null;
-                if (mi.getIcon() != null)
-                    bm = getMenuImage(mi.getIcon());
-                hmenusids.add(new MenuMap(mi, bm));
+                int nID = hMenusIDs.size();
+                hMenusIDs.add(new MenuMap(mi));
 
-                if (!User32Ex.INSTANCE.AppendMenu(hsub, (mi.isEnabled() ? MF_ENABLED : MF_GRAYED) | MF_STRING, nID,
-                        mi.getText()))
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MFT_OWNERDRAW, nID, null))
                     throw new GetLastErrorException();
-                if (!User32Ex.INSTANCE.SetMenuItemBitmaps(hsub, nID, 0, bm, bm))
+
+                MENUITEMINFO mmi = new MENUITEMINFO();
+                if (!User32Ex.INSTANCE.GetMenuItemInfo(hmenu, nID, false, mmi))
+                    throw new GetLastErrorException();
+                mmi.dwItemData = new ULONG_PTR(nID);
+                mmi.fMask |= MENUITEMINFO.MIIM_DATA;
+                if (!User32Ex.INSTANCE.SetMenuItemInfo(hmenu, nID, false, mmi))
                     throw new GetLastErrorException();
             }
 
             if (e instanceof JPopupMenu.Separator) {
-                if (!User32Ex.INSTANCE.AppendMenu(hsub, MF_SEPARATOR, 0, null))
+                if (!User32Ex.INSTANCE.AppendMenu(hmenu, MF_SEPARATOR, 0, null))
                     throw new GetLastErrorException();
             }
         }
 
-        return hsub;
+        return hmenu;
 
     }
 
     public void show() {
-        if (hbm != null) {
-            GDI32.INSTANCE.DeleteObject(hbm);
-            hbm = null;
-        }
-        if (hico != null) {
-            GDI32.INSTANCE.DeleteObject(hico);
-            hico = null;
-        }
-
-        hbm = createBitmap(icon);
-        hico = createIconIndirect(hbm);
-
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
         nid.setTooltip(title);
         nid.hWnd = mp.hWnd;
         nid.uCallbackMessage = WM_SHELLNOTIFY;
-        nid.hIcon = hico;
+        nid.hIcon = hicoTrayIcon;
 
         if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_ADD, nid))
             throw new GetLastErrorException();
     }
 
     public void update() {
-        if (hbm != null) {
-            GDI32.INSTANCE.DeleteObject(hbm);
-            hbm = null;
-        }
-        if (hico != null) {
-            GDI32.INSTANCE.DeleteObject(hico);
-            hico = null;
-        }
-
-        hbm = createBitmap(icon);
-        hico = createIconIndirect(hbm);
 
         NOTIFYICONDATA nid = new NOTIFYICONDATA();
         nid.setTooltip(title);
         nid.hWnd = mp.hWnd;
         nid.uCallbackMessage = WM_SHELLNOTIFY;
-        nid.hIcon = hico;
+        nid.hIcon = hicoTrayIcon;
 
         if (!Shell32Ex.INSTANCE.Shell_NotifyIcon(Shell32Ex.NIM_MODIFY, nid))
             throw new GetLastErrorException();
@@ -606,7 +646,7 @@ public class WindowsSysTray extends DesktopSysTray {
         User32.INSTANCE.SetForegroundWindow(mp.hWnd);
 
         Point p = MouseInfo.getPointerInfo().getLocation();
-        if (!User32Ex.INSTANCE.TrackPopupMenu(hmenus.get(0), TPM_RIGHTBUTTON, p.x, p.y, 0, mp.hWnd, null))
+        if (!User32Ex.INSTANCE.TrackPopupMenu(hMenus.get(0), TPM_RIGHTBUTTON, p.x, p.y, 0, mp.hWnd, null))
             throw new GetLastErrorException();
 
         User32.INSTANCE.PostMessage(mp.hWnd, WM_NULL, null, null);

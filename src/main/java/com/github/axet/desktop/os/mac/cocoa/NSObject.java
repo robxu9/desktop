@@ -31,6 +31,8 @@ public class NSObject extends Pointer {
     }
 
     protected void finalize() throws Throwable {
+        super.finalize();
+
         release();
     }
 
