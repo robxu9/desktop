@@ -170,4 +170,12 @@ public interface User32Ex extends Library {
      */
     COLORREF GetSysColor(int nIndex);
 
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms633500(v=vs.85).aspx
+    /**
+     * HWND WINAPI FindWindowEx( _In_opt_ HWND hwndParent, _In_opt_ HWND
+     * hwndChildAfter, _In_opt_ LPCTSTR lpszClass, _In_opt_ LPCTSTR lpszWindow
+     * );
+     */
+    HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, String lpszClass, String lpszWindow);
+
 }

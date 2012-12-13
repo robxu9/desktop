@@ -78,6 +78,10 @@ public class WindowsSysTray extends DesktopSysTray {
     public static final int WM_SHELLNOTIFY = WM_USER + 1;
     public static final int WM_MEASUREITEM = 44;
     public static final int WM_DRAWITEM = 43;
+    public static final int WM_CANCELMODE = 0x001F;
+    public static final int VK_ESCAPE = 0x1B;
+    public static final int WM_KEYDOWN = 0x0100;
+    public static final int WM_KEYUP = 0x0101;
 
     public static final int MF_ENABLED = 0;
     public static final int MF_DISABLED = 0x00000002;
@@ -89,6 +93,7 @@ public class WindowsSysTray extends DesktopSysTray {
     public static final int MF_SEPARATOR = 0x00000800;
     public static final int MF_POPUP = 0x00000010;
 
+    public static final int TPM_RECURSE = 0x0001;
     public static final int TPM_RIGHTBUTTON = 0x0002;
 
     public static final int SM_CYMENUCHECK = 72;
@@ -294,8 +299,7 @@ public class WindowsSysTray extends DesktopSysTray {
     HBitmapWrap hbitmapUnchecked;
     HBitmapWrap hbitmapTrayIcon;
     HIconWrap hicoTrayIcon;
-    // free HMENU later, when close
-    List<HMENU> hMenus = new ArrayList<HMENU>();
+    HMENU hMenus;
     // position in this list == id of HMENU item
     List<MenuMap> hMenusIDs = new ArrayList<MenuMap>();
 
@@ -452,10 +456,11 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     void clearMenus() {
-        for (HMENU hmenu : hMenus) {
-            User32Ex.INSTANCE.DestroyMenu(hmenu);
+        if (hMenus != null) {
+            if (!User32Ex.INSTANCE.DestroyMenu(hMenus))
+                throw new GetLastErrorException();
+            hMenus = null;
         }
-        hMenus.clear();
         for (MenuMap m : hMenusIDs) {
             m.close();
         }
@@ -470,7 +475,7 @@ public class WindowsSysTray extends DesktopSysTray {
         clearMenus();
 
         HMENU hmenu = User32Ex.INSTANCE.CreatePopupMenu();
-        hMenus.add(hmenu);
+        this.hMenus = hmenu;
 
         for (int i = 0; i < menu.getComponentCount(); i++) {
             Component e = menu.getComponent(i);
@@ -478,7 +483,6 @@ public class WindowsSysTray extends DesktopSysTray {
             if (e instanceof JMenu) {
                 JMenu sub = (JMenu) e;
                 HMENU hsub = createSubmenu(sub);
-                hMenus.add(hsub);
 
                 int nID = hMenusIDs.size();
                 hMenusIDs.add(new MenuMap(sub));
@@ -540,6 +544,8 @@ public class WindowsSysTray extends DesktopSysTray {
 
     HMENU createSubmenu(JMenu menu) {
         HMENU hmenu = User32Ex.INSTANCE.CreatePopupMenu();
+        // seems like you dont have to free this menu, since it already attached
+        // to main HMENU handler
 
         for (int i = 0; i < menu.getMenuComponentCount(); i++) {
             Component e = menu.getMenuComponent(i);
@@ -547,7 +553,6 @@ public class WindowsSysTray extends DesktopSysTray {
             if (e instanceof JMenu) {
                 JMenu sub = (JMenu) e;
                 HMENU hsub = createSubmenu(sub);
-                hMenus.add(hsub);
 
                 // you know, the usual windows tricks (transfer handle to
                 // decimal)
@@ -643,11 +648,31 @@ public class WindowsSysTray extends DesktopSysTray {
 
     public void showContextMenu() {
         updateMenus();
+
         User32.INSTANCE.SetForegroundWindow(mp.hWnd);
 
         Point p = MouseInfo.getPointerInfo().getLocation();
-        if (!User32Ex.INSTANCE.TrackPopupMenu(hMenus.get(0), TPM_RIGHTBUTTON, p.x, p.y, 0, mp.hWnd, null))
-            throw new GetLastErrorException();
+        while (!User32Ex.INSTANCE.TrackPopupMenu(hMenus, TPM_RIGHTBUTTON, p.x, p.y, 0, mp.hWnd, null)) {
+            // 0x000005a6 - "Popup menu already active."
+            if (Kernel32.INSTANCE.GetLastError() == 0x000005a6) {
+                HWND hWnd = null;
+                while (true) {
+                    // "#32768" - pop up menu window class
+                    hWnd = User32Ex.INSTANCE.FindWindowEx(null, hWnd, "#32768", null);
+                    if (hWnd == null)
+                        break;
+                    User32Ex.INSTANCE.SendMessage(hWnd, WM_KEYDOWN, new WPARAM(VK_ESCAPE), null);
+                    // User32Ex.INSTANCE.SendMessage(hWnd, WM_KEYUP, new
+                    // WPARAM(VK_ESCAPE), null);
+                    // User32Ex.INSTANCE.SendMessage(hWnd, WM_CLOSE, new
+                    // WPARAM(VK_ESCAPE), null);
+                }
+                // noting is working...
+                // just return.
+                return;
+            } else
+                throw new GetLastErrorException();
+        }
 
         User32.INSTANCE.PostMessage(mp.hWnd, WM_NULL, null, null);
     }
