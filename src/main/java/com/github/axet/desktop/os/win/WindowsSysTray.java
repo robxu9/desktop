@@ -323,6 +323,8 @@ public class WindowsSysTray extends DesktopSysTray {
     }
 
     public void close() {
+        hide();
+        
         if (hbitmapChecked != null) {
             hbitmapChecked.close();
             hbitmapChecked = null;
