@@ -56,6 +56,8 @@ public class OSXSysTrayAction extends NSObject {
 
     protected void finalize() throws Throwable {
         map.remove(Pointer.nativeValue(this));
+
+        super.finalize();
     }
 
 }
