@@ -5,9 +5,7 @@ import com.github.axet.desktop.os.win.handle.ATOM;
 import com.github.axet.desktop.os.win.handle.WNDCLASSEX;
 import com.github.axet.desktop.os.win.handle.WNDPROC;
 import com.github.axet.desktop.os.win.libs.User32Ex;
-import com.sun.jna.Pointer;
 import com.sun.jna.WString;
-import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.WinDef.HINSTANCE;
 
 public class WndClassExWrap {
