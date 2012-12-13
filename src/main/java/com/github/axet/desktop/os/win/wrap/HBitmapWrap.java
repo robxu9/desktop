@@ -70,7 +70,7 @@ public class HBitmapWrap extends HBITMAP {
     BufferedImage img;
 
     public HBitmapWrap(BufferedImage img) {
-        super(createBitmap(img).getPointer());
+        setPointer(createBitmap(img).getPointer());
 
         this.img = img;
     }
