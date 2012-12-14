@@ -28,6 +28,10 @@ public class Apple {
         public void appReOpened();
     }
 
+    public static interface AboutHandler {
+        public void showAboutMenu();
+    }
+
     public Apple() {
     }
 
@@ -126,6 +130,18 @@ public class Apple {
             a.setOpenURIHandler(new com.apple.eawt.OpenURIHandler() {
                 public void openURI(com.apple.eawt.AppEvent.OpenURIEvent e) {
                     q.openURI(e.getURI());
+                }
+            });
+    }
+
+    public void setAboutHandler(final AboutHandler ee) {
+        com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
+        if (ee == null)
+            a.setAboutHandler(null);
+        else
+            a.setAboutHandler(new com.apple.eawt.AboutHandler() {
+                public void handleAbout(com.apple.eawt.AppEvent.AboutEvent e) {
+                    ee.showAboutMenu();
                 }
             });
     }
