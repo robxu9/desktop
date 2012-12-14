@@ -9,11 +9,11 @@ import com.github.axet.desktop.os.mac.foundation.Runtime;
 import com.sun.jna.Pointer;
 import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
 
-// https://developer.apple.com/library/mac/#documentation/Cocoa/Reference/ApplicationKit/Classes/NSImage_Class
-
 public class OSXSysTrayAction extends NSObject {
 
-    static HashMap<Long, OSXSysTrayAction> map = new HashMap<Long, OSXSysTrayAction>();
+    //
+    // register
+    //
 
     final static Pointer registerKlass = Runtime.INSTANCE.objc_allocateClassPair(NSObject.klass,
             OSXSysTrayAction.class.getSimpleName(), 0);
@@ -40,9 +40,19 @@ public class OSXSysTrayAction extends NSObject {
         Runtime.INSTANCE.objc_registerClassPair(registerKlass);
     }
 
+    //
+    // class instances
+    //
+
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass(OSXSysTrayAction.class.getSimpleName());
 
     static Pointer action = Runtime.INSTANCE.sel_getUid("action");
+
+    //
+    // members
+    //
+
+    static HashMap<Long, OSXSysTrayAction> map = new HashMap<Long, OSXSysTrayAction>();
 
     JMenuItem mi;
 

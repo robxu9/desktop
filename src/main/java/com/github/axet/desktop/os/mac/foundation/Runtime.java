@@ -13,7 +13,7 @@ public interface Runtime extends Library {
 
     Runtime INSTANCE = (Runtime) Native.loadLibrary("objc", Runtime.class);
 
-    public Pointer objc_lookUpClass(String name);
+    Pointer objc_lookUpClass(String name);
 
     String class_getName(Pointer cls);
 
@@ -23,7 +23,7 @@ public interface Runtime extends Library {
 
     long objc_msgSend(Pointer theReceiver, Pointer theSelector, Object... string);
 
-    long class_createInstance(Pointer cls, int extraBytes);
+    Pointer class_createInstance(Pointer cls, int extraBytes);
 
     boolean class_addMethod(Pointer cls, Pointer selector, StdCallCallback imp, String types);
 
@@ -38,4 +38,6 @@ public interface Runtime extends Library {
     Pointer method_setImplementation(Pointer method, StdCallCallback imp);
 
     Pointer objc_getProtocol(String protocol);
+    
+    boolean class_addProtocol(Pointer cls, Pointer protocol);
 }

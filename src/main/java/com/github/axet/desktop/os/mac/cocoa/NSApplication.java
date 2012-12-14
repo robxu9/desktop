@@ -22,6 +22,8 @@ public class NSApplication extends NSObject {
     static Pointer runModalForWindow = Runtime.INSTANCE.sel_getUid("runModalForWindow:");
     static Pointer delegate = Runtime.INSTANCE.sel_getUid("delegate");
     static Pointer setDelegate = Runtime.INSTANCE.sel_getUid("setDelegate:");
+    static Pointer terminate = Runtime.INSTANCE.sel_getUid("terminate:");
+    static Pointer mainMenu = Runtime.INSTANCE.sel_getUid("mainMenu");
 
     public static NSApplication sharedApplication() {
         return new NSApplication(Runtime.INSTANCE.objc_msgSend(klass, sharedApplication));
@@ -73,5 +75,13 @@ public class NSApplication extends NSObject {
 
     public void setDelegate(NSApplicationDelegate d) {
         Runtime.INSTANCE.objc_msgSend(this, setDelegate, d);
+    }
+
+    public void terminate(Pointer sender) {
+        Runtime.INSTANCE.objc_msgSend(this, terminate, sender);
+    }
+
+    public NSMenu mainMenu() {
+        return new NSMenu(Runtime.INSTANCE.objc_msgSend(this, mainMenu));
     }
 }
