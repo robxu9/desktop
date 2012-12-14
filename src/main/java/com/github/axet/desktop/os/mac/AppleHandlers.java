@@ -4,9 +4,14 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import com.github.axet.desktop.os.mac.cocoa.AEEventClass;
+import com.github.axet.desktop.os.mac.cocoa.AEEventID;
+import com.github.axet.desktop.os.mac.cocoa.NSAppleEventDescriptor;
+import com.github.axet.desktop.os.mac.cocoa.NSAppleEventManager;
 import com.github.axet.desktop.os.mac.cocoa.NSApplication;
 import com.github.axet.desktop.os.mac.cocoa.NSApplicationDelegate;
 import com.github.axet.desktop.os.mac.cocoa.NSArray;
@@ -18,6 +23,9 @@ import com.github.axet.desktop.os.mac.foundation.ApplicationServices;
 import com.github.axet.desktop.os.mac.foundation.Runtime;
 import com.sun.jna.Pointer;
 import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
+
+//unable to use proper callbacks values.
+//https://github.com/twall/jna/issues/168
 
 public class AppleHandlers extends NSApplicationDelegate {
 
@@ -96,6 +104,8 @@ public class AppleHandlers extends NSApplicationDelegate {
 
     public void addOpenFileListener(OpenFileHandler e) {
         files.add(e);
+
+        sbuscribeToFiles();
     }
 
     public void removeOpenFileListener(OpenFileHandler e) {
@@ -116,6 +126,37 @@ public class AppleHandlers extends NSApplicationDelegate {
 
     public void addOpenURIListener(OpenURIHandler e) {
         uri.add(e);
+
+        subscribeToURI();
+    }
+
+    void sbuscribeToFiles() {
+        // we shall subscribe to java events, since first event already has been
+        // eaten by Apple Java Wrapper
+        com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
+        a.setOpenFileHandler(new com.apple.eawt.OpenFilesHandler() {
+            public void openFiles(com.apple.eawt.AppEvent.OpenFilesEvent e) {
+                JOptionPane.showMessageDialog(null, "FILE " + e.toString());
+                return;
+            }
+        });
+    }
+
+    void subscribeToURI() {
+        NSAppleEventManager ev = NSAppleEventManager.sharedAppleEventManager();
+
+        ev.setEventHandlerAndSelectorForEventClassAndEventID(this, getURL, AEEventClass.kInternetEventClass,
+                AEEventID.kAEGetURL);
+
+        // we shall subscribe to java events, since first event already has been
+        // eaten by Apple Java Wrapper
+        com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
+        a.setOpenURIHandler(new com.apple.eawt.OpenURIHandler() {
+            public void openURI(com.apple.eawt.AppEvent.OpenURIEvent e) {
+                return;
+            }
+        });
+
     }
 
     public void removeOpenURIListener(OpenURIHandler e) {
@@ -175,16 +216,61 @@ public class AppleHandlers extends NSApplicationDelegate {
         }
     };
 
+    // getURL
+
+    final static Pointer getURLRegister = Runtime.INSTANCE.sel_registerName("getURL");
+
+    public interface GetURLAction extends StdCallCallback {
+        public void callback(Pointer self, Pointer selector, Pointer event, Pointer replyEvent);
+    }
+
+    final static GetURLAction getURLActionImp = new GetURLAction() {
+        public void callback(Pointer self, Pointer selector, final Pointer event, Pointer replyEvent) {
+            if (selector.equals(getURLRegister)) {
+                for (OpenURIHandler q : new ArrayList<OpenURIHandler>(uri)) {
+                    try {
+                        NSAppleEventDescriptor e = new NSAppleEventDescriptor(event);
+                        if (e.numberOfItems() > 0) {
+                            NSAppleEventDescriptor d = e.descriptorAtIndex(1);
+                            final NSString s = d.stringValue();
+                            q.openURI(new URI(s.toString()));
+                        }
+                    } catch (URISyntaxException e) {
+                        // ignore
+                    }
+                }
+            }
+        }
+    };
+
+    // about menu
+
+    final static Pointer aboutMenuRegister = Runtime.INSTANCE.sel_registerName("aboutMenu");
+
+    public interface AboutMenuImp extends StdCallCallback {
+        public void callback(Pointer self, Pointer selector);
+    }
+
+    final static AboutMenuImp aboutMenuImp = new AboutMenuImp() {
+        public void callback(Pointer self, Pointer selector) {
+            if (selector.equals(aboutMenuRegister)) {
+                for (AboutHandler q : new ArrayList<AboutHandler>(ab)) {
+                    q.showAboutMenu();
+                }
+            }
+        }
+    };
+
     // applicationOpenFile
 
     final static Pointer applicationOpenFile = Runtime.INSTANCE.sel_registerName("application:openFile:");
 
     public interface ApplicationOpenFileImp extends StdCallCallback {
-        public boolean callback(Pointer self, Pointer selector, NSString file);
+        public boolean callback(Pointer self, Pointer selector, Pointer app, Pointer file);
     }
 
     final static ApplicationOpenFileImp applicationOpenFileImp = new ApplicationOpenFileImp() {
-        public boolean callback(Pointer self, Pointer selector, NSString file) {
+        public boolean callback(Pointer self, Pointer selector, Pointer app, Pointer file) {
             if (selector.equals(applicationOpenFile)) {
                 for (OpenFileHandler q : new ArrayList<OpenFileHandler>(files)) {
                     q.openFile(new File(file.toString()));
@@ -194,41 +280,19 @@ public class AppleHandlers extends NSApplicationDelegate {
         }
     };
 
-    // about menu
-
-    final static Pointer aboutMenu = Runtime.INSTANCE.sel_registerName("aboutMenu");
-
-    public interface AboutMenuImp extends StdCallCallback {
-        public void callback(Pointer self, Pointer selector);
-    }
-
-    final static AboutMenuImp aboutMenuImp = new AboutMenuImp() {
-        public void callback(Pointer self, Pointer selector) {
-            if (selector.equals(aboutMenu)) {
-                for (AboutHandler q : new ArrayList<AboutHandler>(ab)) {
-                    q.showAboutMenu();
-                }
-            }
-        }
-    };
-
     // application:openFileWithoutUI:
 
     final static Pointer applicationOpenFileNo = Runtime.INSTANCE.sel_registerName("application:openFileWithoutUI:");
 
     public interface ApplicationOpenFileNoImp extends StdCallCallback {
-        public boolean callback(Pointer self, Pointer selector, NSString file);
+        public boolean callback(Pointer self, Pointer selector, Pointer app, Pointer file);
     }
 
     final static ApplicationOpenFileNoImp applicationOpenFileNoImp = new ApplicationOpenFileNoImp() {
-        public boolean callback(Pointer self, Pointer selector, NSString file) {
+        public boolean callback(Pointer self, Pointer selector, Pointer app, Pointer file) {
             if (selector.equals(applicationOpenFileNo)) {
-                for (OpenURIHandler q : new ArrayList<OpenURIHandler>(uri)) {
-                    try {
-                        q.openURI(new URI(file.toString()));
-                    } catch (URISyntaxException e) {
-                        // ignore
-                    }
+                for (OpenFileHandler q : new ArrayList<OpenFileHandler>(files)) {
+                    q.openFile(new File(new NSString(file).toString()));
                 }
             }
             return true;
@@ -240,19 +304,40 @@ public class AppleHandlers extends NSApplicationDelegate {
     final static Pointer applicationOpenFiles = Runtime.INSTANCE.sel_registerName("application:openFiles:");
 
     public interface ApplicationOpenFilesImp extends StdCallCallback {
-        public boolean callback(Pointer self, Pointer selector, NSArray file);
+        public void callback(Pointer self, Pointer selector, Pointer app, Pointer file);
     }
 
     final static ApplicationOpenFilesImp applicationOpenFilesImp = new ApplicationOpenFilesImp() {
-        public boolean callback(Pointer self, Pointer selector, NSArray file) {
+        public void callback(Pointer self, Pointer selector, Pointer app, Pointer file) {
             if (selector.equals(applicationOpenFiles)) {
+                NSArray a = new NSArray(file);
                 for (OpenFileHandler q : new ArrayList<OpenFileHandler>(files)) {
-                    for (int i = 0; i < file.count(); i++) {
-                        NSString s = new NSString(file.objectAtIndex(i));
+                    for (int i = 0; i < a.count(); i++) {
+                        NSString s = new NSString(a.objectAtIndex(i));
                         q.openFile(new File(s.toString()));
                     }
                 }
             }
+        }
+    };
+
+    // applicationOpenFiles
+
+    final static Pointer applicationReOpen = Runtime.INSTANCE
+            .sel_registerName("applicationShouldHandleReopen:hasVisibleWindows:");
+
+    public interface ApplicationReOpen extends StdCallCallback {
+        public boolean callback(Pointer self, Pointer selector, Pointer app, boolean file);
+    }
+
+    final static ApplicationReOpen applicationReOpenImp = new ApplicationReOpen() {
+        public boolean callback(Pointer self, Pointer selector, Pointer app, boolean file) {
+            if (selector.equals(applicationReOpen)) {
+                for (AppReOpenedListener q : new ArrayList<AppReOpenedListener>(re)) {
+                    q.appReOpened();
+                }
+            }
+
             return true;
         }
     };
@@ -262,16 +347,22 @@ public class AppleHandlers extends NSApplicationDelegate {
                 registerApplicationShouldTerminateImp, "i@:i"))
             throw new RuntimeException("problem initalizing class");
 
-        if (!Runtime.INSTANCE.class_addMethod(registerKlass, applicationOpenFile, applicationOpenFileImp, "B@:*"))
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, applicationOpenFile, applicationOpenFileImp, "B@:@*"))
             throw new RuntimeException("problem initalizing class");
 
-        if (!Runtime.INSTANCE.class_addMethod(registerKlass, applicationOpenFileNo, applicationOpenFileNoImp, "B@:*"))
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, applicationOpenFileNo, applicationOpenFileNoImp, "B@:@*"))
             throw new RuntimeException("problem initalizing class");
 
-        if (!Runtime.INSTANCE.class_addMethod(registerKlass, applicationOpenFiles, applicationOpenFilesImp, "v@:@"))
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, applicationOpenFiles, applicationOpenFilesImp, "v@:@@"))
             throw new RuntimeException("problem initalizing class");
 
-        if (!Runtime.INSTANCE.class_addMethod(registerKlass, aboutMenu, aboutMenuImp, "v@:"))
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, applicationReOpen, applicationReOpenImp, "v@:@@"))
+            throw new RuntimeException("problem initalizing class");
+
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, aboutMenuRegister, aboutMenuImp, "v@:"))
+            throw new RuntimeException("problem initalizing class");
+
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, getURLRegister, getURLActionImp, "v@:@@"))
             throw new RuntimeException("problem initalizing class");
 
         if (!Runtime.INSTANCE.class_addProtocol(registerKlass, NSApplicationDelegate.protocol))
@@ -286,7 +377,8 @@ public class AppleHandlers extends NSApplicationDelegate {
 
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass(AppleHandlers.class.getSimpleName());
 
-    static Pointer action = Runtime.INSTANCE.sel_getUid("aboutMenu");
+    static Pointer aboutMenu = Runtime.INSTANCE.sel_getUid("aboutMenu");
+    static Pointer getURL = Runtime.INSTANCE.sel_getUid("getURL");
 
     //
     // members
@@ -298,14 +390,16 @@ public class AppleHandlers extends NSApplicationDelegate {
         NSApplication a = NSApplication.sharedApplication();
         a.setDelegate(this);
 
-        // getting about menu. i hope here is better way to do so. (tag lookup
-        // for example)
-        NSMenu m = a.mainMenu();
-        NSMenuItem mm = m.itemAtIndex(0);
-        m = mm.submenu();
-        mm = m.itemAtIndex(0);
-        mm.setTarget(this);
-        mm.setAction(action);
+        {
+            // fixing about menu. i hope here is better way to do so. (tag
+            // lookup for example)
+            NSMenu m = a.mainMenu();
+            NSMenuItem mm = m.itemAtIndex(0);
+            m = mm.submenu();
+            mm = m.itemAtIndex(0);
+            mm.setTarget(this);
+            mm.setAction(aboutMenu);
+        }
     }
 
     public AppleHandlers(Pointer p) {

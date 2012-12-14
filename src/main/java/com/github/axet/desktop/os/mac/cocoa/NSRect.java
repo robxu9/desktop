@@ -1,5 +1,8 @@
 package com.github.axet.desktop.os.mac.cocoa;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 
 public class NSRect extends Structure {
@@ -43,6 +46,11 @@ public class NSRect extends Structure {
         super();
         useMemory(pointer, offset);
         read();
+    }
+    
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList(new String[] { "origin", "size" });
     }
 
     public NSPoint origin;

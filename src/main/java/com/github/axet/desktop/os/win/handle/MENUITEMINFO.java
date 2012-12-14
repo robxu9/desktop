@@ -1,5 +1,8 @@
 package com.github.axet.desktop.os.win.handle;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
@@ -37,6 +40,12 @@ public class MENUITEMINFO extends Structure {
 
     public MENUITEMINFO(Pointer p) {
         super(p);
+    }
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList(new String[] { "cbSize", "fMask", "fType", "fState", "wID", "hSubMenu", "hbmpChecked",
+                "hbmpUnchecked", "dwItemData", "dwTypeData", "cch", "hbmpItem" });
     }
 
     public int cbSize;
