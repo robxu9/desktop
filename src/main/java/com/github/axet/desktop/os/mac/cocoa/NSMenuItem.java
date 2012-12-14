@@ -16,6 +16,9 @@ public class NSMenuItem extends NSObject {
     static Pointer setState = Runtime.INSTANCE.sel_getUid("setState:");
     static Pointer setTarget = Runtime.INSTANCE.sel_getUid("setTarget:");
     static Pointer setAction = Runtime.INSTANCE.sel_getUid("setAction:");
+    static Pointer submenu = Runtime.INSTANCE.sel_getUid("submenu");
+    static Pointer tag = Runtime.INSTANCE.sel_getUid("tag");
+    static Pointer title = Runtime.INSTANCE.sel_getUid("title");
 
     public NSMenuItem() {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
@@ -59,5 +62,17 @@ public class NSMenuItem extends NSObject {
 
     public void setAction(Pointer p) {
         Runtime.INSTANCE.objc_msgSend(this, setAction, p);
+    }
+
+    public NSMenu submenu() {
+        return new NSMenu(Runtime.INSTANCE.objc_msgSend(this, submenu));
+    }
+
+    public long tag() {
+        return Runtime.INSTANCE.objc_msgSend(this, tag);
+    }
+
+    public NSString title() {
+        return new NSString(Runtime.INSTANCE.objc_msgSend(this, title));
     }
 }

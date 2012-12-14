@@ -10,9 +10,14 @@ public class NSMenu extends NSObject {
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass("NSMenu");
     static Pointer addItem = Runtime.INSTANCE.sel_getUid("addItem:");
     static Pointer setAutoenablesItems = Runtime.INSTANCE.sel_getUid("setAutoenablesItems:");
+    static Pointer itemAtIndex = Runtime.INSTANCE.sel_getUid("itemAtIndex:");
 
     public NSMenu() {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
+    }
+
+    public NSMenu(long l) {
+        super(l);
     }
 
     public NSMenu(Pointer p) {
@@ -25,5 +30,9 @@ public class NSMenu extends NSObject {
 
     public void setAutoenablesItems(boolean b) {
         Runtime.INSTANCE.objc_msgSend(this, setAutoenablesItems, b);
+    }
+
+    public NSMenuItem itemAtIndex(int i) {
+        return new NSMenuItem(Runtime.INSTANCE.objc_msgSend(this, itemAtIndex, i));
     }
 }
