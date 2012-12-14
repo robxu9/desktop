@@ -1,12 +1,15 @@
 package com.github.axet.desktop.os.mac;
 
 import java.io.File;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import com.github.axet.desktop.os.mac.cocoa.AEEventClass;
 import com.github.axet.desktop.os.mac.cocoa.AEEventID;
@@ -24,8 +27,9 @@ import com.github.axet.desktop.os.mac.foundation.Runtime;
 import com.sun.jna.Pointer;
 import com.sun.jna.win32.StdCallLibrary.StdCallCallback;
 
-//unable to use proper callbacks values.
-//https://github.com/twall/jna/issues/168
+// unable to use proper callbacks values.
+//
+// https://github.com/twall/jna/issues/168
 
 public class AppleHandlers extends NSApplicationDelegate {
 
@@ -130,16 +134,78 @@ public class AppleHandlers extends NSApplicationDelegate {
         subscribeToURI();
     }
 
+    public static class OpenFilesHandlerClassHandler implements InvocationHandler {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getName().equals("openFiles")) {
+                final Class<?> openFilesEventClass = Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
+                final Method getFiles = openFilesEventClass.getMethod("getFiles");
+
+                Object e = args[0];
+
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<File> ff = (List<File>) getFiles.invoke(e);
+                    for (OpenFileHandler q : new ArrayList<OpenFileHandler>(files)) {
+                        for (File f : ff) {
+                            q.openFile(f);
+                        }
+                    }
+                } catch (RuntimeException ee) {
+                    throw ee;
+                } catch (Exception ee) {
+                    throw new RuntimeException(ee);
+                }
+            }
+            return null;
+        }
+    }
+
     void sbuscribeToFiles() {
         // we shall subscribe to java events, since first event already has been
         // eaten by Apple Java Wrapper
-        com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
-        a.setOpenFileHandler(new com.apple.eawt.OpenFilesHandler() {
-            public void openFiles(com.apple.eawt.AppEvent.OpenFilesEvent e) {
-                JOptionPane.showMessageDialog(null, "FILE " + e.toString());
-                return;
+
+        try {
+            final Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+            final Class<?> openFilesHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
+            final Method getApplication = applicationClass.getMethod("getApplication");
+            final Object application = getApplication.invoke(null);
+            final Method setOpenFileHandler = applicationClass.getMethod("setOpenFileHandler", openFilesHandlerClass);
+
+            ClassLoader openFilesHandlerClassLoader = openFilesHandlerClass.getClassLoader();
+            OpenFilesHandlerClassHandler openFilesHandlerHandler = new OpenFilesHandlerClassHandler();
+            Object openFilesHandlerObject = Proxy.newProxyInstance(openFilesHandlerClassLoader,
+                    new Class<?>[] { openFilesHandlerClass }, openFilesHandlerHandler);
+
+            setOpenFileHandler.invoke(application, openFilesHandlerObject);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static class OpenURIHandlerHandler implements InvocationHandler {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getName().equals("openURI")) {
+                final Class<?> openURIEventClass = Class.forName("com.apple.eawt.AppEvent$OpenURIEvent");
+                final Method getURI = openURIEventClass.getMethod("getURI");
+
+                Object e = args[0];
+
+                try {
+                    for (OpenURIHandler q : new ArrayList<OpenURIHandler>(uri)) {
+                        q.openURI((URI) getURI.invoke(e));
+                    }
+                } catch (RuntimeException ee) {
+                    throw ee;
+                } catch (Exception ee) {
+                    throw new RuntimeException(ee);
+                }
             }
-        });
+            return null;
+        }
     }
 
     void subscribeToURI() {
@@ -150,12 +216,24 @@ public class AppleHandlers extends NSApplicationDelegate {
 
         // we shall subscribe to java events, since first event already has been
         // eaten by Apple Java Wrapper
-        com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
-        a.setOpenURIHandler(new com.apple.eawt.OpenURIHandler() {
-            public void openURI(com.apple.eawt.AppEvent.OpenURIEvent e) {
-                return;
-            }
-        });
+        try {
+            final Class<?> applicationClass = Class.forName("com.apple.eawt.Application");
+            final Method getApplication = applicationClass.getMethod("getApplication");
+            final Object application = getApplication.invoke(null);
+            final Class<?> openURIHandlerClass = Class.forName("com.apple.eawt.OpenURIHandler");
+            final Method setOpenURIHandler = applicationClass.getMethod("setOpenURIHandler", openURIHandlerClass);
+            final ClassLoader openURIHandlerClassLoader = openURIHandlerClass.getClassLoader();
+            OpenURIHandlerHandler openURIHandlerHandler = new OpenURIHandlerHandler();
+
+            Object openFilesHandlerObject = Proxy.newProxyInstance(openURIHandlerClassLoader,
+                    new Class<?>[] { openURIHandlerClass }, openURIHandlerHandler);
+
+            setOpenURIHandler.invoke(application, openFilesHandlerObject);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
