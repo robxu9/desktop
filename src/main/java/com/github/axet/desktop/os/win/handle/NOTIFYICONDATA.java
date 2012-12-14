@@ -1,5 +1,8 @@
 package com.github.axet.desktop.os.win.handle;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.github.axet.desktop.os.win.GUID;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.WinDef.HICON;
@@ -30,6 +33,14 @@ public class NOTIFYICONDATA extends Structure {
 
     public NOTIFYICONDATA() {
         cbSize = size();
+    }
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays
+                .asList(new String[] { "cbSize", "hWnd", "uID", "uFlags", "uCallbackMessage", "hIcon", "szTip",
+                        "dwState", "dwStateMask", "szInfo", "union", "szInfoTitle", "dwInfoFlags", "guidItem",
+                        "hBalloonIcon" });
     }
 
     public int cbSize = 0;

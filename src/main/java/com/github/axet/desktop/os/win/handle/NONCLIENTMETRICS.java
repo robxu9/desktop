@@ -1,5 +1,8 @@
 package com.github.axet.desktop.os.win.handle;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
@@ -36,6 +39,14 @@ public class NONCLIENTMETRICS extends Structure {
 
         read();
     }
+    
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList(new String[] { "cbSize","iBorderWidth","iScrollWidth","iScrollHeight","iCaptionWidth","iCaptionHeight",
+                "lfCaptionFont","iSmCaptionWidth","iSmCaptionHeight","lfSmCaptionFont","iMenuWidth","iMenuHeight","lfMenuFont","lfStatusFont","lfMessageFont",
+                "iPaddedBorderWidth"});
+    }
+
 
     public int cbSize;
     public int iBorderWidth;

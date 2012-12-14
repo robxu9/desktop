@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,5 +69,10 @@ public class GUID extends Structure {
         bb.putShort(i.shortValue());
         bb.order(ByteOrder.BIG_ENDIAN);
         return bb.getShort(0);
+    }
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList(new String[] { "data" });
     }
 }

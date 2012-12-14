@@ -1,5 +1,8 @@
 package com.github.axet.desktop.os.win.handle;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.platform.win32.BaseTSD.ULONG_PTR;
@@ -39,6 +42,12 @@ public class DRAWITEMSTRUCT extends Structure {
         super(p);
 
         read();
+    }
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList(new String[] { "CtlType", "CtlID", "itemID", "itemAction", "itemState", "hwndItem", "hDC",
+                "rcItem", "itemData" });
     }
 
     public int CtlType;

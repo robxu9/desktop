@@ -1,5 +1,8 @@
 package com.github.axet.desktop.apple;
 
+import java.io.File;
+import java.net.URI;
+
 import javax.swing.JFrame;
 
 import com.github.axet.desktop.os.mac.AppleHandlers;
@@ -12,11 +15,15 @@ public class AppDelegate {
     public AppDelegate() {
         m.setVisible(true);
 
-        d.addQuitHandlerListener(new AppleHandlers.QuitHandler() {
+        d.addOpenFileListener(new AppleHandlers.OpenFileHandler() {
             @Override
-            public void handleQuit() {
-                m.setVisible(false);
-                m.dispose();
+            public void openFile(File f) {
+            }
+        });
+
+        d.addOpenURIListener(new AppleHandlers.OpenURIHandler() {
+            @Override
+            public void openURI(URI uri) {
             }
         });
     }

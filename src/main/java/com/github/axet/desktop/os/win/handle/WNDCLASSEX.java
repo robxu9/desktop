@@ -1,5 +1,8 @@
 package com.github.axet.desktop.os.win.handle;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.jna.Structure;
 import com.sun.jna.WString;
 import com.sun.jna.platform.win32.WinDef.HCURSOR;
@@ -31,6 +34,12 @@ public class WNDCLASSEX extends Structure {
     public WString lpszMenuName;
     public WString lpszClassName;
     public HICON hIconSm;
+
+    @Override
+    protected List getFieldOrder() {
+        return Arrays.asList(new String[] { "cbSize", "style", "lpfnWndProc", "cbClsExtra", "cbWndExtra", "hInstance",
+                "hIcon", "hCursor", "hbrBackground", "lpszMenuName", "lpszClassName", "hIconSm" });
+    }
 
     public static class ByReference extends WNDCLASSEX implements Structure.ByReference {
     }
