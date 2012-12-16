@@ -79,6 +79,24 @@ library very helpful.
         }
     }
 
+## Example Power Events
+    
+    import com.github.axet.desktop.Desktop;
+    import com.github.axet.desktop.DesktopPower;
+    
+    public class DesktopPowerTest {
+        public static void main(String[] args) {
+            DesktopPower d = Desktop.getDesktopPower();
+            d.addListener(new DesktopPower.Listener() {
+                @Override
+                public void quit() {
+                    // logout / reboot / Command+Q
+                    System.out.println("System (Windows / OSX / Linux) want to close the app");
+                }
+            });
+        }
+    }
+
 ## Central Maven Repo
 
 	<dependencies>
