@@ -168,7 +168,7 @@ public class WindowsSysTray extends DesktopSysTray {
                         break;
                     }
                     case User32.WM_QUIT:
-                        User32.INSTANCE.PostQuitMessage(0);
+                        User32.INSTANCE.PostMessage(hWnd, User32.WM_QUIT, null, null);
                         break;
                     }
 
@@ -246,7 +246,15 @@ public class WindowsSysTray extends DesktopSysTray {
             User32Ex.INSTANCE.SendMessage(hWnd, User32.WM_QUIT, null, null);
 
             try {
-                t.join();
+                // we have two logics here:
+                //
+                // 1) when main thread is current thread (we are closing on
+                // native event) we shall not close current thread
+                //
+                // 2) when main thread is java thread - we have to wait until
+                // current thread ends
+                if (!Thread.currentThread().equals(t))
+                    t.join();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

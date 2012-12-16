@@ -28,7 +28,7 @@ public class WindowsPower extends DesktopPower {
         Object lock = new Object();
 
         public MessagePump() {
-            t = new Thread(this, "MessagePump");
+            t = new Thread(this, WindowsPower.class.getSimpleName());
         }
 
         public void start() {
@@ -52,7 +52,7 @@ public class WindowsPower extends DesktopPower {
                         }
                         break;
                     case User32.WM_QUIT:
-                        User32.INSTANCE.PostQuitMessage(0);
+                        User32.INSTANCE.PostMessage(hWnd, User32.WM_QUIT, null, null);
                         break;
                     }
 
@@ -112,16 +112,18 @@ public class WindowsPower extends DesktopPower {
             User32Ex.INSTANCE.SendMessage(hWnd, User32.WM_QUIT, null, null);
 
             try {
-                t.join();
+                if (!Thread.currentThread().equals(t))
+                    t.join();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
     }
-    
+
     MessagePump mp = new MessagePump();
 
     public WindowsPower() {
+        mp.start();
     }
 
     @Override
