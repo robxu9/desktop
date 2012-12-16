@@ -176,6 +176,7 @@ public class WindowsPowerXP extends DesktopPower {
         }
     };
     HHOOK hHook;
+    JFrame f = new JFrame();
 
     public WindowsPowerXP() {
         if (!Kernel32Ex.INSTANCE.SetProcessShutdownParameters(0x03FF, 0))
@@ -187,7 +188,6 @@ public class WindowsPowerXP extends DesktopPower {
             throw new GetLastErrorException();
 
         final HWND hwnd = new HWND();
-        JFrame f = new JFrame();
         f.pack();
         hwnd.setPointer(Native.getComponentPointer(f));
 
@@ -201,6 +201,9 @@ public class WindowsPowerXP extends DesktopPower {
     public void close() {
         if (!User32.INSTANCE.UnhookWindowsHookEx(hHook))
             throw new GetLastErrorException();
+
+        f.dispose();
+        f = null;
 
         mp.close();
 
