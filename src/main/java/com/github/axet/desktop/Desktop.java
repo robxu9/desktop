@@ -57,10 +57,11 @@ public abstract class Desktop {
 
     public static DesktopPower getDesktopPower() {
         if (desktopPower == null) {
-            if (SystemUtils.IS_OS_WINDOWS_XP) {
-                desktopPower = new WindowsPowerXP();
-            }else if(SystemUtils.IS_OS_WINDOWS){
-                desktopPower = new WindowsPowerVista();
+            if (SystemUtils.IS_OS_WINDOWS) {
+                if (SystemUtils.IS_OS_WINDOWS_XP)
+                    desktopPower = new WindowsPowerXP();
+                else
+                    desktopPower = new WindowsPowerVista();
             }
 
             if (com.sun.jna.Platform.isMac()) {
