@@ -1,11 +1,14 @@
 package com.github.axet.desktop;
 
+import org.apache.commons.lang.SystemUtils;
+
 import com.github.axet.desktop.os.Linux;
 import com.github.axet.desktop.os.mac.OSX;
 import com.github.axet.desktop.os.mac.OSXPower;
 import com.github.axet.desktop.os.mac.OSXSysTray;
 import com.github.axet.desktop.os.win.Windows;
-import com.github.axet.desktop.os.win.WindowsPower;
+import com.github.axet.desktop.os.win.WindowsPowerVista;
+import com.github.axet.desktop.os.win.WindowsPowerXP;
 import com.github.axet.desktop.os.win.WindowsSysTray;
 
 public abstract class Desktop {
@@ -54,8 +57,10 @@ public abstract class Desktop {
 
     public static DesktopPower getDesktopPower() {
         if (desktopPower == null) {
-            if (com.sun.jna.Platform.isWindows()) {
-                desktopPower = new WindowsPower();
+            if (SystemUtils.IS_OS_WINDOWS_XP) {
+                desktopPower = new WindowsPowerXP();
+            }else if(SystemUtils.IS_OS_WINDOWS){
+                desktopPower = new WindowsPowerVista();
             }
 
             if (com.sun.jna.Platform.isMac()) {

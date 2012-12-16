@@ -22,6 +22,7 @@ import com.sun.jna.win32.W32APIOptions;
 
 public interface User32Ex extends Library {
 
+    public static final int WS_OVERLAPPED = 0;
     public static final int WS_OVERLAPPEDWINDOW = 0xcf0000;
     public static final int SPI_GETNONCLIENTMETRICS = 0x0029;
     public static final int COLOR_MENU = 4;

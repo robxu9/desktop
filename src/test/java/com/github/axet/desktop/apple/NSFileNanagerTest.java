@@ -1,16 +1,10 @@
 package com.github.axet.desktop.apple;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import com.github.axet.desktop.os.mac.cocoa.NSArray;
 import com.github.axet.desktop.os.mac.cocoa.NSFileManager;
 import com.github.axet.desktop.os.mac.cocoa.NSURL;
 
 public class NSFileNanagerTest {
-    public static Test suite() {
-        return new TestSuite(NSFileNanagerTest.class);
-    }
 
     public static void main(String[] args) {
         NSFileManager f = new NSFileManager();
