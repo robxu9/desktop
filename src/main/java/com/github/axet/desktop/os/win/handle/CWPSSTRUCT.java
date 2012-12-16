@@ -15,7 +15,7 @@ public class CWPSSTRUCT extends Structure {
     public HWND hwnd;
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "lParam", "wParam", "message", "hwnd" });
     }
 }

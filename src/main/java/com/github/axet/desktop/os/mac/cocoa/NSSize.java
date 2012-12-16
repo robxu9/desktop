@@ -42,7 +42,7 @@ public class NSSize extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "width", "height" });
     }
 

@@ -43,7 +43,7 @@ public class MENUITEMINFO extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "cbSize", "fMask", "fType", "fState", "wID", "hSubMenu", "hbmpChecked",
                 "hbmpUnchecked", "dwItemData", "dwTypeData", "cch", "hbmpItem" });
     }

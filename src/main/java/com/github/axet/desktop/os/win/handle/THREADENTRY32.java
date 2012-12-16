@@ -24,7 +24,7 @@ public class THREADENTRY32 extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "dwSize", "cntUsage", "th32ThreadID", "th32OwnerProcessID", "tpBasePri",
                 "tpDeltaPri", "dwFlags" });
     }

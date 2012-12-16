@@ -36,7 +36,7 @@ public class WNDCLASSEX extends Structure {
     public HICON hIconSm;
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "cbSize", "style", "lpfnWndProc", "cbClsExtra", "cbWndExtra", "hInstance",
                 "hIcon", "hCursor", "hbrBackground", "lpszMenuName", "lpszClassName", "hIconSm" });
     }

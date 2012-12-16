@@ -41,7 +41,7 @@ public class NONCLIENTMETRICS extends Structure {
     }
     
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "cbSize","iBorderWidth","iScrollWidth","iScrollHeight","iCaptionWidth","iCaptionHeight",
                 "lfCaptionFont","iSmCaptionWidth","iSmCaptionHeight","lfSmCaptionFont","iMenuWidth","iMenuHeight","lfMenuFont","lfStatusFont","lfMessageFont",
                 "iPaddedBorderWidth"});

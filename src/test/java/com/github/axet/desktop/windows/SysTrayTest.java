@@ -4,8 +4,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -29,7 +27,8 @@ import com.github.axet.desktop.DesktopSysTray;
 import com.github.axet.desktop.os.win.WindowsSysTray;
 
 public class SysTrayTest extends JFrame {
-
+    private static final long serialVersionUID = -7388906080696230194L;
+    
     DesktopSysTray sys = Desktop.getDesktopSysTray();
     ImageIcon warn;
     ImageIcon stop;
@@ -254,7 +253,6 @@ public class SysTrayTest extends JFrame {
         JButton btnShowJmenu = new JButton("Show jmenu");
         btnShowJmenu.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Point p = MouseInfo.getPointerInfo().getLocation();
                 menu.show(that, 100, 100);
             }
         });

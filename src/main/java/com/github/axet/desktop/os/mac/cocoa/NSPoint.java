@@ -42,7 +42,7 @@ public class NSPoint extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "x", "y" });
     }
 
