@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.sun.jna.Structure;
-import com.sun.jna.platform.win32.WinDef.DWORD;
-import com.sun.jna.platform.win32.WinDef.LONG;
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/ms686735(v=vs.85).aspx
 /**
