@@ -70,7 +70,6 @@ public class WindowsSysTray extends DesktopSysTray {
     public static final int WM_LBUTTONUP = 0x0202;
     public static final int WM_LBUTTONDBLCLK = 515;
     public static final int WM_RBUTTONUP = 517;
-    public static final int WM_QUIT = 0x0012;
     public static final int WM_CLOSE = 0x0010;
     public static final int WM_NULL = 0x0000;
     public static final int SW_SHOW = 5;
@@ -111,7 +110,7 @@ public class WindowsSysTray extends DesktopSysTray {
         Object lock = new Object();
 
         public MessagePump() {
-            t = new Thread(this, "MessagePump");
+            t = new Thread(this, WindowsSysTray.class.getSimpleName());
         }
 
         public void start() {
@@ -168,7 +167,7 @@ public class WindowsSysTray extends DesktopSysTray {
                         drawItem(mm, di.hDC, di.rcItem, di.itemState);
                         break;
                     }
-                    case WM_QUIT:
+                    case User32.WM_QUIT:
                         User32.INSTANCE.PostQuitMessage(0);
                         break;
                     }
@@ -188,7 +187,7 @@ public class WindowsSysTray extends DesktopSysTray {
         HWND createWindow() {
             hInstance = Kernel32.INSTANCE.GetModuleHandle(null);
 
-            wc = new WndClassExWrap(hInstance, WndProc, "SystemTrayIcon");
+            wc = new WndClassExWrap(hInstance, WndProc, WindowsSysTray.class.getSimpleName());
 
             HWND hwnd = User32Ex.INSTANCE.CreateWindowEx(0, wc.getName(), wc.getName(), User32Ex.WS_OVERLAPPEDWINDOW,
                     0, 0, 0, 0, null, null, hInstance, null);
@@ -244,7 +243,7 @@ public class WindowsSysTray extends DesktopSysTray {
         }
 
         void close() {
-            User32Ex.INSTANCE.SendMessage(hWnd, WM_QUIT, null, null);
+            User32Ex.INSTANCE.SendMessage(hWnd, User32.WM_QUIT, null, null);
 
             try {
                 t.join();
@@ -324,7 +323,7 @@ public class WindowsSysTray extends DesktopSysTray {
 
     public void close() {
         hide();
-        
+
         if (hbitmapChecked != null) {
             hbitmapChecked.close();
             hbitmapChecked = null;

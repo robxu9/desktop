@@ -2,14 +2,17 @@ package com.github.axet.desktop;
 
 import com.github.axet.desktop.os.Linux;
 import com.github.axet.desktop.os.mac.OSX;
+import com.github.axet.desktop.os.mac.OSXPower;
 import com.github.axet.desktop.os.mac.OSXSysTray;
 import com.github.axet.desktop.os.win.Windows;
+import com.github.axet.desktop.os.win.WindowsPower;
 import com.github.axet.desktop.os.win.WindowsSysTray;
 
 public abstract class Desktop {
 
     static DesktopFolders desktopFolders = null;
     static DesktopSysTray desktopSysTray = null;
+    static DesktopPower desktopPower = null;
 
     public static DesktopFolders getDesktopFolders() {
         if (desktopFolders == null) {
@@ -47,6 +50,23 @@ public abstract class Desktop {
         }
 
         return desktopSysTray;
+    }
+
+    public static DesktopPower getDesktopPower() {
+        if (desktopPower == null) {
+            if (com.sun.jna.Platform.isWindows()) {
+                desktopPower = new WindowsPower();
+            }
+
+            if (com.sun.jna.Platform.isMac()) {
+                desktopPower = new OSXPower();
+            }
+
+            if (desktopPower == null)
+                throw new RuntimeException("OS not supported");
+        }
+
+        return desktopPower;
     }
 
 }
