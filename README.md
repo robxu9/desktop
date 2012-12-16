@@ -17,7 +17,8 @@ library very helpful.
         }
     }
 
-## Example Sys Tray Icon (Notification Area Icons or Status Bar ions)
+## Example Sys Tray Icon
+(aka Notification Area Icons or Status Bar icons)
 
     package com.github.axet.desktop;
     
@@ -84,7 +85,7 @@ library very helpful.
 		<dependency>
 		  <groupId>com.github.axet</groupId>
 		  <artifactId>desktop</artifactId>
-		  <version>2.0.0</version>
+		  <version>2.0.12</version>
 		</dependency>
 	</dependencies>
 		
