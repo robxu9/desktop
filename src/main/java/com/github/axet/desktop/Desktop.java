@@ -2,11 +2,11 @@ package com.github.axet.desktop;
 
 import org.apache.commons.lang.SystemUtils;
 
-import com.github.axet.desktop.os.Linux;
-import com.github.axet.desktop.os.mac.OSX;
+import com.github.axet.desktop.os.LinuxFolders;
+import com.github.axet.desktop.os.mac.OSXFolders;
 import com.github.axet.desktop.os.mac.OSXPower;
 import com.github.axet.desktop.os.mac.OSXSysTray;
-import com.github.axet.desktop.os.win.Windows;
+import com.github.axet.desktop.os.win.WindowsFolders;
 import com.github.axet.desktop.os.win.WindowsPowerVista;
 import com.github.axet.desktop.os.win.WindowsPowerXP;
 import com.github.axet.desktop.os.win.WindowsSysTray;
@@ -20,15 +20,15 @@ public abstract class Desktop {
     public static DesktopFolders getDesktopFolders() {
         if (desktopFolders == null) {
             if (com.sun.jna.Platform.isWindows()) {
-                desktopFolders = new Windows();
+                desktopFolders = new WindowsFolders();
             }
 
             if (com.sun.jna.Platform.isMac()) {
-                desktopFolders = new OSX();
+                desktopFolders = new OSXFolders();
             }
 
             if (com.sun.jna.Platform.isLinux()) {
-                desktopFolders = new Linux();
+                desktopFolders = new LinuxFolders();
             }
 
             if (desktopFolders == null)
