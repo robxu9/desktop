@@ -2,9 +2,9 @@ package com.github.axet.desktop;
 
 import org.apache.commons.lang.SystemUtils;
 
-import com.github.axet.desktop.os.LinuxFolders;
-import com.github.axet.desktop.os.LinuxPower;
-import com.github.axet.desktop.os.LinuxSysTray;
+import com.github.axet.desktop.os.linux.LinuxFolders;
+import com.github.axet.desktop.os.linux.LinuxPower;
+import com.github.axet.desktop.os.linux.LinuxSysTray;
 import com.github.axet.desktop.os.mac.OSXFolders;
 import com.github.axet.desktop.os.mac.OSXPower;
 import com.github.axet.desktop.os.mac.OSXSysTray;

@@ -1,4 +1,4 @@
-package com.github.axet.desktop.os;
+package com.github.axet.desktop.os.linux;
 
 import java.io.BufferedReader;
 import java.io.File;

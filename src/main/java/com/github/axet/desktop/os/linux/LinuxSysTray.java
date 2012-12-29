@@ -1,4 +1,4 @@
-package com.github.axet.desktop.os;
+package com.github.axet.desktop.os.linux;
 
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;

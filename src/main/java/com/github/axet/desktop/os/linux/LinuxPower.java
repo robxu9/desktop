@@ -1,4 +1,4 @@
-package com.github.axet.desktop.os;
+package com.github.axet.desktop.os.linux;
 
 import com.github.axet.desktop.DesktopPower;
 
