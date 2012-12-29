@@ -13,6 +13,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.Icon;
@@ -63,6 +66,17 @@ public class LinuxSysTray extends DesktopSysTray {
     public void show() {
         if (trayIcon == null) {
             trayIcon = new TrayIcon(image, title, null);
+            trayIcon.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    for (Listener l : listeners) {
+                        if (e.getClickCount() == 2)
+                            l.mouseLeftDoubleClick();
+                        else
+                            l.mouseLeftClick();
+                    }
+                }
+            });
             try {
                 tray.add(trayIcon);
             } catch (AWTException e) {
