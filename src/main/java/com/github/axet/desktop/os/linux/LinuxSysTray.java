@@ -30,6 +30,10 @@ import com.github.axet.desktop.Utils;
  * 
  * http://standards.freedesktop.org/systemtray-spec/systemtray-spec-latest.html
  * 
+ * TODO rewrite plugin for native menus
+ * 
+ * see for example XSystemTrayPeer.java
+ * 
  */
 
 public class LinuxSysTray extends DesktopSysTray {
