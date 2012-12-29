@@ -8,7 +8,7 @@ import com.github.axet.desktop.os.mac.cocoa.NSArray;
 import com.github.axet.desktop.os.mac.cocoa.NSFileManager;
 import com.github.axet.desktop.os.mac.cocoa.NSURL;
 
-public class OSX implements DesktopFolders {
+public class OSXFolders implements DesktopFolders {
 
     @Override
     public File getAppData() {

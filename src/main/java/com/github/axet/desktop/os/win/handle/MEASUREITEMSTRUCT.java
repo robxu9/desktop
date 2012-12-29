@@ -37,7 +37,7 @@ public class MEASUREITEMSTRUCT extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "CtlType", "CtlID", "itemID", "itemWidth", "itemHeight", "itemData" });
     }
 

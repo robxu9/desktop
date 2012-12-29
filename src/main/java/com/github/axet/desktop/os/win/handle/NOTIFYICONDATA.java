@@ -36,7 +36,7 @@ public class NOTIFYICONDATA extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays
                 .asList(new String[] { "cbSize", "hWnd", "uID", "uFlags", "uCallbackMessage", "hIcon", "szTip",
                         "dwState", "dwStateMask", "szInfo", "union", "szInfoTitle", "dwInfoFlags", "guidItem",

@@ -72,7 +72,7 @@ public class GUID extends Structure {
     }
 
     @Override
-    protected List getFieldOrder() {
+    protected List<?> getFieldOrder() {
         return Arrays.asList(new String[] { "data" });
     }
 }

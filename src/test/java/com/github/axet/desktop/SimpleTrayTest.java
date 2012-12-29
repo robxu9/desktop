@@ -8,7 +8,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
     
     public class SimpleTrayTest extends JFrame {
-    
+        private static final long serialVersionUID = -8634052159132145737L;
+        
         DesktopSysTray sys = Desktop.getDesktopSysTray();
         JPopupMenu menu;
     

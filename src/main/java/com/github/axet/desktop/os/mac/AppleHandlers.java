@@ -9,8 +9,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 import com.github.axet.desktop.os.mac.cocoa.AEEventClass;
 import com.github.axet.desktop.os.mac.cocoa.AEEventID;
 import com.github.axet.desktop.os.mac.cocoa.NSAppleEventDescriptor;

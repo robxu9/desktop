@@ -18,7 +18,7 @@ import com.sun.jna.ptr.PointerByReference;
  * users-home-directory-in-java
  * 
  */
-public class Windows implements DesktopFolders {
+public class WindowsFolders implements DesktopFolders {
 
     public File getHome() {
         return new File(System.getenv("USERPROFILE"));

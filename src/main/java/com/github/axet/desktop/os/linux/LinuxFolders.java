@@ -1,4 +1,4 @@
-package com.github.axet.desktop.os;
+package com.github.axet.desktop.os.linux;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +15,7 @@ import com.github.axet.desktop.DesktopFolders;
 
 // man xdg-user-dirs
 
-public class Linux implements DesktopFolders {
+public class LinuxFolders implements DesktopFolders {
 
     File rootFile = new File("/etc/xdg/user-dirs.conf");
     Map<String, String> root;
