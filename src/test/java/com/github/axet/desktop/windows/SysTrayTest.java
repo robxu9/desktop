@@ -1,9 +1,16 @@
 package com.github.axet.desktop.windows;
 
+import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -28,7 +35,7 @@ import com.github.axet.desktop.os.win.WindowsSysTray;
 
 public class SysTrayTest extends JFrame {
     private static final long serialVersionUID = -7388906080696230194L;
-    
+
     DesktopSysTray sys = Desktop.getDesktopSysTray();
     ImageIcon warn;
     ImageIcon stop;
@@ -230,7 +237,7 @@ public class SysTrayTest extends JFrame {
         JButton btnCreate = new JButton("Create");
         btnCreate.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                sys = new WindowsSysTray();
+                sys = Desktop.getDesktopSysTray();
                 sys.addListener(ml);
                 sys.setIcon(warn);
                 sys.setTitle("Java tool2");
@@ -286,7 +293,6 @@ public class SysTrayTest extends JFrame {
         gbc_btnHide.gridy = 4;
         getContentPane().add(btnHide, gbc_btnHide);
         this.setVisible(true);
-
     }
 
     public void swIcons() {
