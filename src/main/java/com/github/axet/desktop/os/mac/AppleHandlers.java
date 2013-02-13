@@ -496,7 +496,7 @@ public class AppleHandlers extends NSApplicationDelegate {
     // members
     //
 
-    public AppleHandlers() {
+    private AppleHandlers() {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
 
         NSApplication a = NSApplication.sharedApplication();
@@ -527,8 +527,16 @@ public class AppleHandlers extends NSApplicationDelegate {
         }
     }
 
-    public AppleHandlers(Pointer p) {
+    private AppleHandlers(Pointer p) {
         super(Pointer.nativeValue(p));
+    }
+
+    static AppleHandlers ah = null;
+
+    static public AppleHandlers getAppleHandlers() {
+        if (ah == null)
+            ah = new AppleHandlers();
+        return ah;
     }
 
     protected void finalize() throws Throwable {

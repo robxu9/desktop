@@ -4,7 +4,7 @@ import com.github.axet.desktop.DesktopPower;
 
 public class OSXPower extends DesktopPower {
 
-    AppleHandlers h = new AppleHandlers();
+    AppleHandlers h = AppleHandlers.getAppleHandlers();
 
     AppleHandlers.QuitHandler q = new AppleHandlers.QuitHandler() {
         @Override

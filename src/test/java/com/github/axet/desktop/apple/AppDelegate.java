@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 import com.github.axet.desktop.os.mac.AppleHandlers;
 
 public class AppDelegate {
-    AppleHandlers d = new AppleHandlers();
+    AppleHandlers d = AppleHandlers.getAppleHandlers();
 
     JFrame m = new JFrame("test");
 
