@@ -1,5 +1,7 @@
 package com.github.axet.desktop.os.mac.cocoa;
 
+import org.apache.commons.codec.binary.StringUtils;
+
 import com.github.axet.desktop.os.mac.foundation.Runtime;
 import com.sun.jna.Pointer;
 
@@ -13,7 +15,7 @@ public class NSString extends NSObject {
     static Pointer UTF8String = Runtime.INSTANCE.sel_getUid("UTF8String");
 
     public NSString(String str) {
-        super(Runtime.INSTANCE.objc_msgSend(klass, stringWithUTF8String, str));
+        super(Runtime.INSTANCE.objc_msgSend(klass, stringWithUTF8String, StringUtils.getBytesUtf8(str + "\0")));
     }
 
     public NSString(long l) {
