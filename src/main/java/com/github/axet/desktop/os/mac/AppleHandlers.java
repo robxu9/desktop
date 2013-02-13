@@ -55,6 +55,10 @@ public class AppleHandlers extends NSApplicationDelegate {
         public void showAboutMenu();
     }
 
+    public static interface SettingsHandler {
+        public void showSettingsMenu();
+    }
+
     // uri
 
     /**
@@ -259,6 +263,16 @@ public class AppleHandlers extends NSApplicationDelegate {
         ab.remove(e);
     }
 
+    static ArrayList<SettingsHandler> st = new ArrayList<SettingsHandler>();
+
+    public void addSettingsListener(SettingsHandler e) {
+        st.add(e);
+    }
+
+    public void removeSettingsListener(SettingsHandler e) {
+        st.remove(e);
+    }
+
     //
     // register
     //
@@ -332,6 +346,24 @@ public class AppleHandlers extends NSApplicationDelegate {
             if (selector.equals(aboutMenuRegister)) {
                 for (AboutHandler q : new ArrayList<AboutHandler>(ab)) {
                     q.showAboutMenu();
+                }
+            }
+        }
+    };
+
+    // settings menu
+
+    final static Pointer settingsMenuRegister = Runtime.INSTANCE.sel_registerName("settingsMenu");
+
+    public interface SettingsMenuImp extends StdCallCallback {
+        public void callback(Pointer self, Pointer selector);
+    }
+
+    final static AboutMenuImp settingsMenuImp = new AboutMenuImp() {
+        public void callback(Pointer self, Pointer selector) {
+            if (selector.equals(settingsMenuRegister)) {
+                for (SettingsHandler q : new ArrayList<SettingsHandler>(st)) {
+                    q.showSettingsMenu();
                 }
             }
         }
@@ -454,6 +486,7 @@ public class AppleHandlers extends NSApplicationDelegate {
     static Pointer klass = Runtime.INSTANCE.objc_lookUpClass(AppleHandlers.class.getSimpleName());
 
     static Pointer aboutMenu = Runtime.INSTANCE.sel_getUid("aboutMenu");
+    static Pointer settingsMenu = Runtime.INSTANCE.sel_getUid("settingsMenu");
     static Pointer getURL = Runtime.INSTANCE.sel_getUid("getURL");
 
     //
@@ -476,7 +509,18 @@ public class AppleHandlers extends NSApplicationDelegate {
             mm.setTarget(this);
             mm.setAction(aboutMenu);
         }
-    }
+
+        {
+            // fixing about menu. i hope here is better way to do so. (tag
+            // lookup for example)
+            NSMenu m = a.mainMenu();
+            NSMenuItem mm = m.itemAtIndex(0);
+            m = mm.submenu();
+            mm = m.itemAtIndex(1);
+            mm.setTarget(this);
+            mm.setAction(settingsMenu);
+        }
+}
 
     public AppleHandlers(Pointer p) {
         super(Pointer.nativeValue(p));
