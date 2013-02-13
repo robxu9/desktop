@@ -19,6 +19,8 @@ public class NSMenuItem extends NSObject {
     static Pointer submenu = Runtime.INSTANCE.sel_getUid("submenu");
     static Pointer tag = Runtime.INSTANCE.sel_getUid("tag");
     static Pointer title = Runtime.INSTANCE.sel_getUid("title");
+    static Pointer initWithTitleActionKeyEquivalent = Runtime.INSTANCE
+            .sel_getUid("initWithTitle:action:keyEquivalent:");
 
     public NSMenuItem() {
         super(Runtime.INSTANCE.class_createInstance(klass, 0));
@@ -34,6 +36,11 @@ public class NSMenuItem extends NSObject {
 
     public static NSMenuItem separatorItem() {
         return new NSMenuItem(Runtime.INSTANCE.objc_msgSend(klass, separatorItem));
+    }
+
+    public static NSMenuItem initWithTitleActionKeyEquivalent(NSString name, Pointer sel, NSString code) {
+        Pointer p = Runtime.INSTANCE.class_createInstance(klass, 0);
+        return new NSMenuItem(Runtime.INSTANCE.objc_msgSend(p, initWithTitleActionKeyEquivalent, name, sel, code));
     }
 
     public void setTitle(NSString i) {

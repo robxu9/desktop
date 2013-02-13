@@ -470,6 +470,9 @@ public class AppleHandlers extends NSApplicationDelegate {
         if (!Runtime.INSTANCE.class_addMethod(registerKlass, aboutMenuRegister, aboutMenuImp, "v@:"))
             throw new RuntimeException("problem initalizing class");
 
+        if (!Runtime.INSTANCE.class_addMethod(registerKlass, settingsMenuRegister, settingsMenuImp, "v@:"))
+            throw new RuntimeException("problem initalizing class");
+
         if (!Runtime.INSTANCE.class_addMethod(registerKlass, getURLRegister, getURLActionImp, "v@:@@"))
             throw new RuntimeException("problem initalizing class");
 
@@ -505,9 +508,9 @@ public class AppleHandlers extends NSApplicationDelegate {
             NSMenu m = a.mainMenu();
             NSMenuItem mm = m.itemAtIndex(0);
             m = mm.submenu();
-            mm = m.itemAtIndex(0);
-            mm.setTarget(this);
-            mm.setAction(aboutMenu);
+            NSMenuItem mmm = m.itemAtIndex(0);
+            mmm.setTarget(this);
+            mmm.setAction(aboutMenu);
         }
 
         {
@@ -516,11 +519,13 @@ public class AppleHandlers extends NSApplicationDelegate {
             NSMenu m = a.mainMenu();
             NSMenuItem mm = m.itemAtIndex(0);
             m = mm.submenu();
-            mm = m.itemAtIndex(1);
-            mm.setTarget(this);
-            mm.setAction(settingsMenu);
+            NSMenuItem mmm = NSMenuItem.initWithTitleActionKeyEquivalent(new NSString("Preferences…"), null,
+                    new NSString(","));
+            mmm.setTarget(this);
+            mmm.setAction(settingsMenu);
+            m.insertItemAtIndex(mmm, 1);
         }
-}
+    }
 
     public AppleHandlers(Pointer p) {
         super(Pointer.nativeValue(p));
