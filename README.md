@@ -103,7 +103,7 @@ library very helpful.
 		<dependency>
 		  <groupId>com.github.axet</groupId>
 		  <artifactId>desktop</artifactId>
-		  <version>2.2.0</version>
+		  <version>2.2.3</version>
 		</dependency>
 	</dependencies>
 		
